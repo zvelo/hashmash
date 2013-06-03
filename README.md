@@ -1,1 +1,1 @@
-node-HashCash
+node-hashcash
