@@ -1,0 +1,19 @@
+{
+  "author": "Joshua Rubin <jrubin@zvelo.com>",
+  "name": "HashCash",
+  "description": "Javascript HashCash Implementation",
+  "version": "0.1.0",
+  "homepage": "http://zvelo.com",
+  "main": "./lib/hashcash.js",
+  "engines": {
+    "node": "~v0.8.15"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "browserify": "2.x.x",
+    "coffee-script": "1.x.x",
+    "mocha": "1.x.x",
+    "should": "1.x.x",
+    "uglify-js": "2.x.x"
+  }
+}
