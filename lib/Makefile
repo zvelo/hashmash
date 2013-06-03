@@ -16,7 +16,6 @@ worker.js: hashcash.js ../src/worker.coffee
 lib: hashcash.js worker.js
 
 clean:
-	@echo "cleaning lib"
 	-$(RM) $(objects)
 
 .PHONY: all lib clean
