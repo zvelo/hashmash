@@ -1,29 +1,31 @@
-HASH_CASH_NUM_BITS = 19
 MAX_TESTS = 100
 
 resource = "zvelo.com"
-
 HashCash = hashcash.HashCash
-hc = new HashCash HASH_CASH_NUM_BITS
-stop = false
 
-results =
-  num: 0
-  duration: 0
-  min: undefined
-  max: undefined
+hc = undefined
+numBits = undefined
+newNumBits = 19
 
-$("#complexity").text HASH_CASH_NUM_BITS
+STATUS_STOPPED = 0
+STATUS_RUNNING = 1
+STATUS_STOPPING = 2
 
-window.start = ->
-  stop = false
-  $("#status").text "running"
-  test()
+status = STATUS_STOPPED
 
-window.stop = ->
-  return if results.num >= MAX_TESTS
-  $("#status").text "stopping"
-  stop = true
+results = {}
+
+window.toggle = ->
+  switch status
+    when STATUS_STOPPED
+      setNumBits()
+      setStatus STATUS_RUNNING
+      test()
+    when STATUS_RUNNING then setStatus STATUS_STOPPING
+    else console.error "toggle from unknown state", status
+
+window.changeNumBits = (elem) ->
+  newNumBits = $(elem).val()
 
 updateData = (start, hashcash) ->
   valid = hc.validate hashcash
@@ -32,28 +34,76 @@ updateData = (start, hashcash) ->
   results.max = duration if not results.max? or duration > results.max
   results.duration += duration
   results.num += 1
-  averageDuration = results.duration / results.num
 
-  $("#test-number").text results.num
-  $("#average-duration").text averageDuration
-  $("#minimum-duration").text results.min
-  $("#maximum-duration").text results.max
+  updateResults()
 
   console.log "test", results.num,
               hashcash, HashCash.hash(hashcash),
               "valid", valid,
               "duration", duration
 
-  if stop
-    $("#status").text "stopped"
-  else if results.num < MAX_TESTS
+  if status is STATUS_STOPPING
+    setStatus STATUS_STOPPED
+    return
+
+  setNumBits()
+
+  if results.num < MAX_TESTS
     test()
+  else
+    setStatus STATUS_STOPPED
+
+setStatus = (value) ->
+  status = value
+  switch status
+    when STATUS_STOPPED
+      $("#toggle").removeAttr("disabled") .text "Start"
+      $("#status").text "stopped"
+    when STATUS_RUNNING
+      $("#toggle").removeAttr("disabled") .text "Stop"
+      $("#status").text "running"
+    when STATUS_STOPPING
+      $("#toggle").attr("disabled", "disabled") .text "Stopping"
+      $("#status").text "stopping"
 
 test = ->
   return if not resource.length
 
   start = new Date()
 
-  hc = new HashCash HASH_CASH_NUM_BITS, "../browser/hashcash_worker.min.js"
+  hc = new HashCash numBits, "../browser/hashcash_worker.min.js"
   hc.generate resource,
     (hashcash) -> updateData start, hashcash
+
+setNumBits = ->
+  return unless status is STATUS_STOPPED or newNumBits?
+  if newNumBits?
+    numBits = newNumBits
+    newNumBits = undefined
+  reset()
+
+reset = ->
+  hc = new HashCash numBits
+  results =
+    num: 0
+    duration: 0
+    min: undefined
+    max: undefined
+  updateResults()
+
+updateResults = ->
+  averageDuration = 0
+
+  if results.num
+    averageDuration = results.duration / results.num
+
+  $("#test-number").text results.num
+  $("#average-duration").text averageDuration
+  $("#minimum-duration").text results.min
+  $("#maximum-duration").text results.max
+
+load = ->
+  setNumBits()
+  $("#num-bits").val numBits
+
+load()
