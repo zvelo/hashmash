@@ -1,51 +1,51 @@
 HASH_CASH_NUM_BITS = 19
 MAX_TESTS = 100
 
-HashCash = hashcash.HashCash
 resource = "zvelo.com"
+
+HashCash = hashcash.HashCash
+hc = new HashCash HASH_CASH_NUM_BITS
+stop = false
 
 results =
   num: 0
   duration: 0
   min: undefined
   max: undefined
-  stop: false
+
+$("#complexity").text HASH_CASH_NUM_BITS
+
+window.start = ->
+  stop = false
+  $("#status").text "running"
+  test()
 
 window.stop = ->
   return if results.num >= MAX_TESTS
-  $("body").append("<p>stopping...</p>")
-  results.stop = true
+  $("#status").text "stopping"
+  stop = true
 
 updateData = (start, hashcash) ->
-  str = "<pre>" +
-        "test number: #{results.num + 1}<br>" +
-        "hashcash: #{hashcash}<br>" +
-        "sha: #{HashCash.hash(hashcash)}<br>"
-
-  hc = new HashCash HASH_CASH_NUM_BITS
   valid = hc.validate hashcash
-
-  str += "valid: #{valid}<br>"
-
   duration = (new Date() - start) / 1000
-
   results.min = duration if not results.min? or duration < results.min
   results.max = duration if not results.max? or duration > results.max
-
   results.duration += duration
   results.num += 1
   averageDuration = results.duration / results.num
 
-  str += "duration: #{duration}<br>" +
-         "average: #{averageDuration}<br>" +
-         "min: #{results.min}<br>" +
-         "max: #{results.max}<br>" +
-         "</pre>"
+  $("#test-number").text results.num
+  $("#average-duration").text averageDuration
+  $("#minimum-duration").text results.min
+  $("#maximum-duration").text results.max
 
-  $("body").append str
+  console.log "test", results.num,
+              hashcash, HashCash.hash(hashcash),
+              "valid", valid,
+              "duration", duration
 
-  if results.stop
-    $("body").append("<p>stopped</p>")
+  if stop
+    $("#status").text "stopped"
   else if results.num < MAX_TESTS
     test()
 
@@ -57,5 +57,3 @@ test = ->
   hc = new HashCash HASH_CASH_NUM_BITS, "../browser/hashcash_worker.min.js"
   hc.generate resource,
     (hashcash) -> updateData start, hashcash
-
-test()

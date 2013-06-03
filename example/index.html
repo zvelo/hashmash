@@ -5,7 +5,16 @@
 <title></title>
 </head>
 <body>
+<button onclick="start()">Start</button>
 <button onclick="stop()">Stop</button>
+<pre>
+complexity:       <span id="complexity">0</span> bits
+number of tests:  <span id="test-number">0</span>
+minimum duration: <span id="minimum-duration">0</span>s
+average duration: <span id="average-duration">0</span>s
+maximum duration: <span id="maximum-duration">0</span>s
+status:           <span id="status">stopped</span>
+</pre>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
 <script src="../browser/hashcash.min.js"></script>
 <script src="example.js"></script>

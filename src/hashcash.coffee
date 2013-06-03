@@ -33,6 +33,8 @@ buildDate = (date) ->
 nodeGenerate = (data, callback) ->
   ## TODO(jrubin) use <NUM_CPUS> workers
   ## workers will get new counter value from main
+  ## TODO(jrubin) make workers static variables
+  ## and only create if non-existant
   worker = childProcess.fork __dirname + "/worker.js"
 
   worker.on "message", (test) ->
@@ -44,6 +46,8 @@ nodeGenerate = (data, callback) ->
 webWorkerGenerate = (data, callback) ->
   ## TODO(jrubin) use 4 workers
   ## workers will get new counter value from main
+  ## TODO(jrubin) make workers static variables
+  ## and only create if non-existant
   worker = new Worker data.file
 
   worker.onmessage = (event) ->
