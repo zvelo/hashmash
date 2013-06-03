@@ -167,10 +167,10 @@ exports.exec = function () {};
   };
 
   browserGenerate = function(data, callback) {
-    var RUNTIME_MAX, TIMEOUT;
+    var RUNTIME_MAX, TIMEOUT, timeoutFn;
     RUNTIME_MAX = 99;
     TIMEOUT = 1;
-    return setTimeout(function() {
+    timeoutFn = function() {
       var start;
       start = new Date();
       while (!((data.result != null) || (new Date() - start >= RUNTIME_MAX))) {
@@ -179,9 +179,10 @@ exports.exec = function () {};
       if (data.result != null) {
         return callback(data.result);
       } else {
-        return setTimeout(arguments.callee, TIMEOUT);
+        return setTimeout(timeoutFn, TIMEOUT);
       }
-    }, TIMEOUT);
+    };
+    return setTimeout(timeoutFn, TIMEOUT);
   };
 
   nextPos = function(str, pos) {
@@ -253,10 +254,11 @@ exports.exec = function () {};
       test = "" + data.challenge + ":" + data.counter;
       sha = sha1.hash(test);
       if (numLeading0s(sha) >= data.bits) {
-        return data.result = test;
+        data.result = test;
       } else {
-        return data.counter += 1;
+        data.counter += 1;
       }
+      return void 0;
     };
 
     HashCash.parse = function(str) {

@@ -58,7 +58,7 @@ browserGenerate = (data, callback) ->
   RUNTIME_MAX = 99
   TIMEOUT = 1
 
-  setTimeout ->
+  timeoutFn = ->
     start = new Date()
 
     until data.result? or (new Date() - start >= RUNTIME_MAX)
@@ -67,8 +67,9 @@ browserGenerate = (data, callback) ->
     if data.result?
       callback data.result
     else
-      setTimeout arguments.callee, TIMEOUT
-  , TIMEOUT
+      setTimeout timeoutFn, TIMEOUT
+
+  setTimeout timeoutFn, TIMEOUT
 
 nextPos = (str, pos) ->
   pos.start = pos.end + 1
@@ -124,6 +125,8 @@ class HashCash
       data.result = test
     else
       data.counter += 1
+
+    undefined
 
   @parse: (str) ->
     return null if not str?
