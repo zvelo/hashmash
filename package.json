@@ -13,6 +13,7 @@
     "url": "https://github.com/zvelo/node-hashcash.git"
   },
   "license": "proprietary",
+  "private": true,
   "scripts": {
     "build": "make",
     "test": "make test"
