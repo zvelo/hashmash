@@ -143,12 +143,18 @@ class HashCash
       begin: 0
       end: -1
 
+  _isComplete: (challenge) ->
+    return @_completed.hasOwnProperty(challenge)
+
+  _setComplete: (challenge) ->
+    @_completed[challenge] = true
+    worker.completed challenge for worker in @_workers
+
   _workerCallback: (result, id, worker) ->
     ## prevent races where multiple workers returned a result
     challenge = result.substr 0, result.lastIndexOf(':')
-    return if @_completed.hasOwnProperty(challenge)
-    @_completed[challenge] = true
-    @stop()
+    return if @_isComplete challenge
+    @_setComplete challenge
     @_callback.call @_caller, result
 
   _workerGenerator: (type) ->

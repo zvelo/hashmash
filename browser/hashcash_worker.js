@@ -94,6 +94,7 @@ process.chdir = function (dir) {
 
     function Drone(sendFn) {
       this.sendFn = sendFn;
+      this._complete = {};
     }
 
     Drone.prototype.gotMessage = function(msg) {
@@ -108,8 +109,18 @@ process.chdir = function (dir) {
         case "range":
           return this._gotRange(msg.range);
         case "stop":
-          return this._stop();
+          return this.stop;
+        case "completed":
+          return this._setComplete(msg.challenge);
       }
+    };
+
+    Drone.prototype._setComplete = function(challenge) {
+      return this._complete[challenge] = true;
+    };
+
+    Drone.prototype._isComplete = function() {
+      return this._complete.hasOwnProperty(this._data.challenge);
     };
 
     Drone.prototype._gotId = function(value) {
@@ -123,13 +134,12 @@ process.chdir = function (dir) {
       if (!((value != null) && (this.id != null))) {
         return;
       }
-      delete this._stopFlag;
       this._data = value;
       return this._requestRange();
     };
 
     Drone.prototype._gotRange = function(value) {
-      if (!((value != null) && (this.id != null) && !this._stopped())) {
+      if (!((value != null) && (this.id != null) && !this._isComplete())) {
         return;
       }
       this._range = value;
@@ -138,7 +148,7 @@ process.chdir = function (dir) {
     };
 
     Drone.prototype._requestRange = function() {
-      if (!((this.id != null) && !this._stopped())) {
+      if (!((this.id != null) && !this._isComplete())) {
         return;
       }
       return this.sendFn({
@@ -148,10 +158,10 @@ process.chdir = function (dir) {
     };
 
     Drone.prototype._sendResult = function() {
-      if (!((this._data.result != null) && (this.id != null) && !this._stopped())) {
+      if (!((this._data.result != null) && (this.id != null) && !this._isComplete())) {
         return;
       }
-      this._stop();
+      this.stop();
       return this.sendFn({
         m: "result",
         id: this.id,
@@ -159,17 +169,13 @@ process.chdir = function (dir) {
       });
     };
 
-    Drone.prototype._stop = function() {
-      return this._stopFlag = true;
-    };
-
-    Drone.prototype._stopped = function() {
-      return this._stopFlag != null;
+    Drone.prototype.stop = function() {
+      return this._setComplete(this._data.challenge);
     };
 
     Drone.prototype.start = function() {
       var me;
-      if (!((this._data != null) && (this._range != null) && !this._stopped())) {
+      if (!((this._data != null) && (this._range != null) && !this._isComplete())) {
         return;
       }
       while (!((this._data.result != null) || this._data.counter === this._range.end)) {
@@ -419,14 +425,29 @@ process.chdir = function (dir) {
       };
     };
 
+    HashCash.prototype._isComplete = function(challenge) {
+      return this._completed.hasOwnProperty(challenge);
+    };
+
+    HashCash.prototype._setComplete = function(challenge) {
+      var worker, _i, _len, _ref, _results;
+      this._completed[challenge] = true;
+      _ref = this._workers;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        worker = _ref[_i];
+        _results.push(worker.completed(challenge));
+      }
+      return _results;
+    };
+
     HashCash.prototype._workerCallback = function(result, id, worker) {
       var challenge;
       challenge = result.substr(0, result.lastIndexOf(':'));
-      if (this._completed.hasOwnProperty(challenge)) {
+      if (this._isComplete(challenge)) {
         return;
       }
-      this._completed[challenge] = true;
-      this.stop();
+      this._setComplete(challenge);
       return this._callback.call(this._caller, result);
     };
 
@@ -709,6 +730,13 @@ exports.exec = function () {};
       });
     };
 
+    TaskMaster.prototype.completed = function(challenge) {
+      return this._sendFn({
+        m: "completed",
+        challenge: challenge
+      });
+    };
+
     return TaskMaster;
 
   })();
@@ -778,14 +806,6 @@ exports.exec = function () {};
       this._callback = _callback;
     }
 
-    TimeoutTaskMaster.prototype.stop = function() {
-      return this._stopFlag = true;
-    };
-
-    TimeoutTaskMaster.prototype._stopped = function() {
-      return this._stopFlag != null;
-    };
-
     TimeoutTaskMaster.prototype.sendData = function(_data) {
       this._data = _data;
       delete this._stopFlag;
@@ -794,14 +814,13 @@ exports.exec = function () {};
 
     TimeoutTaskMaster.prototype.start = function() {
       var me, startTime;
-      if (this._stopped()) {
-        return;
-      }
       startTime = new Date();
-      while (!((this._data.result != null) || (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME))) {
+      while (!((this._stopFlag != null) || (this._data.result != null) || (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME))) {
         hashcash.HashCash.testSha(this._data);
       }
-      if (this._data.result != null) {
+      if (this._stopFlag != null) {
+
+      } else if (this._data.result != null) {
         return this._callback.call(this._caller, this._data.result);
       } else {
         me = this;
@@ -809,6 +828,14 @@ exports.exec = function () {};
           return me.start.call(me);
         }), TimeoutTaskMaster.YIELD_TIME);
       }
+    };
+
+    TimeoutTaskMaster.prototype.stop = function() {
+      return this._stopFlag = true;
+    };
+
+    TimeoutTaskMaster.prototype.completed = function() {
+      return this.stop();
     };
 
     return TimeoutTaskMaster;

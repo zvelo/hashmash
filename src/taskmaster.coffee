@@ -2,6 +2,8 @@ os = require "os"
 childProcess = require "child_process"
 hashcash = require("./hashcash")
 
+## TODO(jrubin) allow NUM_WORKERS to be configurable
+
 class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
 
@@ -32,8 +34,8 @@ class TaskMaster
       when "result" then @_gotResult msg.id, msg.result
       when "console_log" then console.log "worker #{msg.id}", msg.data
 
-  stop: ->
-    @_sendFn m: "stop"
+  stop: -> @_sendFn m: "stop"
+  completed: (challenge) -> @_sendFn m: "completed", challenge: challenge
 
 class NodeTaskMaster extends (TaskMaster)
   @NUM_WORKERS = if os.cpus? then os.cpus().length else 0
@@ -71,27 +73,27 @@ class TimeoutTaskMaster
 
   constructor: (@_caller, @_id, @_callback) ->
 
-  stop: -> @_stopFlag = true
-  _stopped: -> @_stopFlag?
-
   sendData: (@_data) ->
     delete @_stopFlag
     @start()
 
   start: ->
-    return if @_stopped()
-
     startTime = new Date()
 
-    until @_data.result? or
+    until @_stopFlag? or @_data.result? or
           (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME)
       hashcash.HashCash.testSha(@_data)
 
-    if @_data.result?
+    if @_stopFlag?
+      ## do nothing
+    else if @_data.result?
       @_callback.call @_caller, @_data.result
     else
       me = @
       setTimeout (-> me.start.call me), TimeoutTaskMaster.YIELD_TIME
+
+  stop: -> @_stopFlag = true
+  completed: -> @stop()
 
 exports.TaskMaster        = TaskMaster
 exports.NodeTaskMaster    = NodeTaskMaster

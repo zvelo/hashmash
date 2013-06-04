@@ -221,14 +221,29 @@ return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require
       };
     };
 
+    HashCash.prototype._isComplete = function(challenge) {
+      return this._completed.hasOwnProperty(challenge);
+    };
+
+    HashCash.prototype._setComplete = function(challenge) {
+      var worker, _i, _len, _ref, _results;
+      this._completed[challenge] = true;
+      _ref = this._workers;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        worker = _ref[_i];
+        _results.push(worker.completed(challenge));
+      }
+      return _results;
+    };
+
     HashCash.prototype._workerCallback = function(result, id, worker) {
       var challenge;
       challenge = result.substr(0, result.lastIndexOf(':'));
-      if (this._completed.hasOwnProperty(challenge)) {
+      if (this._isComplete(challenge)) {
         return;
       }
-      this._completed[challenge] = true;
-      this.stop();
+      this._setComplete(challenge);
       return this._callback.call(this._caller, result);
     };
 
@@ -511,6 +526,13 @@ exports.exec = function () {};
       });
     };
 
+    TaskMaster.prototype.completed = function(challenge) {
+      return this._sendFn({
+        m: "completed",
+        challenge: challenge
+      });
+    };
+
     return TaskMaster;
 
   })();
@@ -580,14 +602,6 @@ exports.exec = function () {};
       this._callback = _callback;
     }
 
-    TimeoutTaskMaster.prototype.stop = function() {
-      return this._stopFlag = true;
-    };
-
-    TimeoutTaskMaster.prototype._stopped = function() {
-      return this._stopFlag != null;
-    };
-
     TimeoutTaskMaster.prototype.sendData = function(_data) {
       this._data = _data;
       delete this._stopFlag;
@@ -596,14 +610,13 @@ exports.exec = function () {};
 
     TimeoutTaskMaster.prototype.start = function() {
       var me, startTime;
-      if (this._stopped()) {
-        return;
-      }
       startTime = new Date();
-      while (!((this._data.result != null) || (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME))) {
+      while (!((this._stopFlag != null) || (this._data.result != null) || (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME))) {
         hashcash.HashCash.testSha(this._data);
       }
-      if (this._data.result != null) {
+      if (this._stopFlag != null) {
+
+      } else if (this._data.result != null) {
         return this._callback.call(this._caller, this._data.result);
       } else {
         me = this;
@@ -611,6 +624,14 @@ exports.exec = function () {};
           return me.start.call(me);
         }), TimeoutTaskMaster.YIELD_TIME);
       }
+    };
+
+    TimeoutTaskMaster.prototype.stop = function() {
+      return this._stopFlag = true;
+    };
+
+    TimeoutTaskMaster.prototype.completed = function() {
+      return this.stop();
     };
 
     return TimeoutTaskMaster;
