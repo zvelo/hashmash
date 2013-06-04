@@ -1,7 +1,12 @@
 ## we use our own sha1 instead of crypto for a more lean browser
 ## implementation with browserify
 sha1 = require "./sha1"
-childProcess = require "child_process"
+taskmaster = require "./taskmaster"
+
+TaskMaster        = taskmaster.TaskMaster
+NodeTaskMaster    = taskmaster.NodeTaskMaster
+WebTaskMaster     = taskmaster.WebTaskMaster
+TimeoutTaskMaster = taskmaster.TimeoutTaskMaster
 
 ## hashcash format:
 ## ver:bits:date:resource:rand:counter
@@ -29,51 +34,6 @@ buildDate = (date) ->
   return null if typeof(date) isnt "number"
 
   return buildDate "#{date}"
-
-nodeGenerate = (data, callback) ->
-  ## TODO(jrubin) use <NUM_CPUS> workers
-  ## workers will get new counter value from main
-  ## TODO(jrubin) make workers static variables
-  ## and only create if non-existant
-  worker = childProcess.fork __dirname + "/worker.js"
-
-  worker.on "message", (test) ->
-    worker.disconnect()
-    callback test
-
-  worker.send data
-
-webWorkerGenerate = (data, callback) ->
-  ## TODO(jrubin) use 4 workers
-  ## workers will get new counter value from main
-  ## TODO(jrubin) make workers static variables
-  ## and only create if non-existant
-  worker = new Worker data.file
-
-  worker.onmessage = (event) ->
-    worker.terminate()
-    callback event.data
-
-  worker.postMessage data
-
-## TODO(jrubin) add a stop method
-
-browserGenerate = (data, callback) ->
-  RUNTIME_MAX = 99
-  TIMEOUT = 1
-
-  timeoutFn = ->
-    start = new Date()
-
-    until data.result? or (new Date() - start >= RUNTIME_MAX)
-      HashCash.testSha(data)
-
-    if data.result?
-      callback data.result
-    else
-      setTimeout timeoutFn, TIMEOUT
-
-  setTimeout timeoutFn, TIMEOUT
 
 nextPos = (str, pos) ->
   pos.start = pos.end + 1
@@ -173,19 +133,50 @@ class HashCash
 
   ## INSTANCE
 
-  constructor: (@bits, @workerFile) ->
-    @bits = HashCash.MIN_BITS if @bits < HashCash.MIN_BITS
+  constructor: (@_caller, @_bits, @_callback, @_workerFile) ->
+    @_bits = HashCash.MIN_BITS if @_bits < HashCash.MIN_BITS
+    @_workers = []
+    @_completed = {}
+
+  _resetRange: ->
+    @range =
+      begin: 0
+      end: -1
+
+  _workerCallback: (result, id, worker) ->
+    ## prevent races where multiple workers returned a result
+    challenge = result.substr 0, result.lastIndexOf(':')
+    return if @_completed.hasOwnProperty(challenge)
+    @_completed[challenge] = true
+    @stop()
+    @_callback.call @_caller, result
+
+  _workerGenerator: (type) ->
+    ## TODO(jrubin) make workers static variables
+    ## and only create if non-existant
+
+    return if @_workers.length
+
+    @_workers = (
+      for id in [ 0 .. type.NUM_WORKERS - 1 ]
+        new type @, id, @_workerCallback, @range, @_workerFile
+    )
+
+  _sendData: (data) -> worker.sendData data for worker in @_workers
+
+  stop: -> worker.stop() for worker in @_workers
 
   generate: (resource, callback) ->
+    @_resetRange()
+
     parts =
       version: HashCash.VERSION
-      bits: @bits
+      bits: @_bits
       date: HashCash.genDate()
       resource: resource
       rand: Math.random().toString(36).substr 2
 
     data =
-      file: @workerFile
       challenge: HashCash.buildString parts
       counter: 0
       bits: parts.bits
@@ -201,22 +192,25 @@ class HashCash
 
     if not window?
       ## running under node
-      nodeGenerate data, callback
-    else if Worker? and @workerFile?
+      type = NodeTaskMaster
+    else if Worker? and @_workerFile?
       ## browser with web workers
-      webWorkerGenerate data, callback
+      type = WebTaskMaster
     else
       ## other browser
-      browserGenerate data, callback
+      type = TimeoutTaskMaster
+
+    @_workerGenerator type
+    @_sendData data
 
   validate: (str) ->
     return false if not str?
-    return false if not @bits?
+    return false if not @_bits?
 
     data = HashCash.parse str
 
     return false if not data?
-    return false if data.bits < @bits
+    return false if data.bits < @_bits
     return false if data.bits < HashCash.MIN_BITS
 
     return false if data.version isnt HashCash.VERSION

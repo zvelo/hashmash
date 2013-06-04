@@ -5,10 +5,16 @@
 <title></title>
 </head>
 <body>
-<label for="num-bits">Complexity:</label>
-<input type="number" name="num-bits" id="num-bits" min="1" max="99" value="16" onchange="changeNumBits(this)">
-bits
-<button id="toggle" onclick="toggle()">Start</button>
+<button id="toggle-status" onclick="tester.toggle()">Start</button>
+<br>
+<input type="number" name="num-tests" id="num-tests" min="1" max="99" value="10" onchange="tester.setNumTests(this)">
+<label for="num-tests">tests to run</label>
+<br>
+<input type="number" name="num-bits" id="num-bits" min="1" max="99" value="16" onchange="tester.reset()">
+<label for="num-bits">bit complexity</label>
+<br>
+<input type="checkbox" id="no-workers" name="no-workers" onchange="tester.reset()">
+<label for="no-workers">disable Web Workers</label>
 <pre>
 number of tests:  <span id="test-number">0</span>
 minimum duration: <span id="minimum-duration">0</span>s
@@ -17,7 +23,7 @@ maximum duration: <span id="maximum-duration">0</span>s
 status:           <span id="status">stopped</span>
 </pre>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
-<script src="../browser/hashcash.min.js"></script>
+<script src="../browser/hashcash.js"></script>
 <script src="example.js"></script>
 </body>
 </html>

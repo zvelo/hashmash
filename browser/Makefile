@@ -1,4 +1,4 @@
-BROWSERIFY = ../node_modules/.bin/browserify
+BROWSERIFY = ../node_modules/.bin/browserify --ignore os
 UGLIFYJS = ../node_modules/.bin/uglifyjs
 
 objects = hashcash.js hashcash.min.js hashcash_worker.js hashcash_worker.min.js
@@ -8,13 +8,13 @@ all: browser
 ../lib/hashcash.js:
 	$(MAKE) -C ../lib hashcash.js
 
-hashcash.js: ../lib/hashcash.js
+hashcash.js: ../lib/hashcash.js ../lib/sha1.js
 	$(BROWSERIFY) -s hashcash ../lib/hashcash.js | cat copyright.js - > hashcash.js
 
 hashcash.min.js: hashcash.js
 	$(UGLIFYJS) hashcash.js 2>/dev/null | cat copyright.js - > hashcash.min.js
 
-hashcash_worker.js: ../lib/worker.js
+hashcash_worker.js: ../lib/worker.js ../lib/hashcash.js ../lib/sha1.js
 	$(BROWSERIFY) ../lib/worker.js | cat copyright.js - > hashcash_worker.js
 
 hashcash_worker.min.js: hashcash_worker.js

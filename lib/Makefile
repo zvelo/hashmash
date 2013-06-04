@@ -1,17 +1,20 @@
 COFFEE = ../node_modules/.bin/coffee
 
-objects = sha1.js hashcash.js worker.js
+objects = sha1.js hashcash.js worker.js taskmaster.js
 
 all: lib
 
 sha1.js: ../src/sha1.coffee
 	$(COFFEE) -co . ../src/sha1.coffee
 
-hashcash.js: sha1.js ../src/hashcash.coffee
+hashcash.js: sha1.js taskmaster.js ../src/hashcash.coffee
 	$(COFFEE) -co . ../src/hashcash.coffee
 
 worker.js: hashcash.js ../src/worker.coffee
 	$(COFFEE) -co . ../src/worker.coffee
+
+taskmaster.js: ../src/taskmaster.coffee
+	$(COFFEE) -co . ../src/taskmaster.coffee
 
 lib: hashcash.js worker.js
 

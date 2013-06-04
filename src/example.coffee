@@ -1,109 +1,123 @@
-MAX_TESTS = 100
-
 resource = "zvelo.com"
 HashCash = hashcash.HashCash
 
-hc = undefined
-numBits = undefined
-newNumBits = 19
+WORKER_FILE = "../browser/hashcash_worker.js"
 
-STATUS_STOPPED = 0
-STATUS_RUNNING = 1
-STATUS_STOPPING = 2
+class Tester
+  @STATUS_STOPPED: 0
+  @STATUS_RUNNING: 1
 
-status = STATUS_STOPPED
+  constructor: ->
+    @status = Tester.STATUS_STOPPED
+    @reset()
 
-results = {}
+  toggle: ->
+    switch @status
+      when Tester.STATUS_STOPPED then @start true
+      when Tester.STATUS_RUNNING then @stop()
+      else console.error "toggle from unknown state", @status
 
-window.toggle = ->
-  switch status
-    when STATUS_STOPPED
-      setNumBits()
-      setStatus STATUS_RUNNING
-      test()
-    when STATUS_RUNNING then setStatus STATUS_STOPPING
-    else console.error "toggle from unknown state", status
+  _hashCashCallback: (hashcash) ->
+    duration = (new Date() - @_startTime) / 1000
+    @_results.min = duration if not @_results.min? or duration < @_results.min
+    @_results.max = duration if not @_results.max? or duration > @_results.max
+    @_results.duration += duration
 
-window.changeNumBits = (elem) ->
-  newNumBits = $(elem).val()
+    @_updateResults hashcash, duration
 
-updateData = (start, hashcash) ->
-  valid = hc.validate hashcash
-  duration = (new Date() - start) / 1000
-  results.min = duration if not results.min? or duration < results.min
-  results.max = duration if not results.max? or duration > results.max
-  results.duration += duration
-  results.num += 1
+    parsed = HashCash.parse hashcash
 
-  updateResults()
+    if @_results.rands.hasOwnProperty(parsed.rand)
+      console.error "repeated hashcash"
 
-  console.log "test", results.num,
-              hashcash, HashCash.hash(hashcash),
-              "valid", valid,
-              "duration", duration
+    @_results.rands[parsed.rand] = true
 
-  if status is STATUS_STOPPING
-    setStatus STATUS_STOPPED
-    return
+    if @_results.num < @_numTests
+      #console.log "starting test #{@_results.num}"
+      @start()
+    else
+      console.log "test finished"
+      @stop()
 
-  setNumBits()
+  start: (reset) ->
+    return unless resource.length and @_hc
 
-  if results.num < MAX_TESTS
-    test()
-  else
-    setStatus STATUS_STOPPED
+    if reset?
+      @status = Tester.STATUS_RUNNING
+      @_results.num = 0
 
-setStatus = (value) ->
-  status = value
-  switch status
-    when STATUS_STOPPED
-      $("#toggle").removeAttr("disabled") .text "Start"
-      $("#status").text "stopped"
-    when STATUS_RUNNING
-      $("#toggle").removeAttr("disabled") .text "Stop"
-      $("#status").text "running"
-    when STATUS_STOPPING
-      $("#toggle").attr("disabled", "disabled") .text "Stopping"
-      $("#status").text "stopping"
+    return unless @status is Tester.STATUS_RUNNING
 
-test = ->
-  return if not resource.length
+    $("#toggle-status").text "Stop"
+    $("#num-tests").attr "disabled", "disabled"
+    $("#status").text "running"
 
-  start = new Date()
+    @_results.num += 1
+    @_results.total_num += 1
 
-  hc = new HashCash numBits, "../browser/hashcash_worker.min.js"
-  hc.generate resource,
-    (hashcash) -> updateData start, hashcash
+    @_startTime = new Date()
 
-setNumBits = ->
-  return unless status is STATUS_STOPPED or newNumBits?
-  if newNumBits?
-    numBits = newNumBits
-    newNumBits = undefined
-  reset()
+    @_hc.generate resource
 
-reset = ->
-  hc = new HashCash numBits
-  results =
-    num: 0
-    duration: 0
-    min: undefined
-    max: undefined
-  updateResults()
+  stop: ->
+    return unless @_hc? and @status is Tester.STATUS_RUNNING
 
-updateResults = ->
-  averageDuration = 0
+    console.log "stopping"
 
-  if results.num
-    averageDuration = results.duration / results.num
+    @_hc.stop()
 
-  $("#test-number").text results.num
-  $("#average-duration").text averageDuration
-  $("#minimum-duration").text results.min
-  $("#maximum-duration").text results.max
+    @status = Tester.STATUS_STOPPED
 
-load = ->
-  setNumBits()
-  $("#num-bits").val numBits
+    $("#toggle-status").text "Start"
+    $("#num-tests").removeAttr "disabled"
+    $("#status").text "stopped"
 
-load()
+  setNumTests: (elem) ->
+    @_numTests  = $("#num-tests").val()
+    console.log "setNumTests", @_numTests
+
+  reset: ->
+    @stop()
+
+    ## load data from document
+    @_numTests  = $("#num-tests").val()
+    @_numBits   = $("#num-bits").val()
+    @_noWorkers = $("#no-workers").is ":checked"
+
+    console.log "loaded numTests", @_numTests,
+                "numBits", @_numBits,
+                "noWorkers", @_noWorkers
+
+    @_hc = new HashCash @, @_numBits,
+      ((hashcash)-> @_hashCashCallback hashcash),
+      if @_noWorkers then undefined else WORKER_FILE
+
+    @_results =
+      num: 0
+      total_num: 0
+      duration: 0
+      min: undefined
+      max: undefined
+      rands: {}
+
+    @_updateResults()
+
+  _updateResults: (hashcash, duration) ->
+    averageDuration = 0
+
+    if @_results.total_num
+      valid = @_hc.validate hashcash
+      averageDuration = @_results.duration / @_results.total_num
+      console.log "test", @_results.total_num,
+                  hashcash, HashCash.hash(hashcash),
+                  "valid", valid,
+                  "duration", duration,
+                  "status", @status,
+                  "average duration", averageDuration
+
+    $("#test-number").text @_results.total_num
+    $("#average-duration").text averageDuration
+    $("#minimum-duration").text if @_results.min? then @_results.min else 0
+    $("#maximum-duration").text if @_results.max? then @_results.max else 0
+
+window.tester = new Tester

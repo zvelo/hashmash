@@ -92,7 +92,12 @@ describe "hashcash", ->
 
     describe "failure", ->
       it "should not validate", (done) ->
-        hc = new HashCash parts.bits
+        hc = new HashCash @, parts.bits, (challenge) ->
+          challenge[0].should.equal "#{HashCash.VERSION}"
+          HashCash.VERSION.should.be.within 0, 8
+          challenge = "#{HashCash.VERSION + 1}#{challenge.substr 1}"
+          hc.validate(challenge).should.equal false
+          done()
 
         hc.validate()
           .should.equal false
@@ -106,16 +111,11 @@ describe "hashcash", ->
         challenge = HashCash.buildString parts
         hc.validate(challenge).should.equal false
 
-        hc.generate parts.resource, (challenge) ->
-          challenge[0].should.equal "#{HashCash.VERSION}"
-          HashCash.VERSION.should.be.within 0, 8
-          challenge = "#{HashCash.VERSION + 1}#{challenge.substr 1}"
-          hc.validate(challenge).should.equal false
-          done()
+        hc.generate parts.resource
 
     describe "success", ->
       it "should validate", (done) ->
-        hc = new HashCash parts.bits
-        hc.generate parts.resource, (challenge) ->
+        hc = new HashCash @, parts.bits, (challenge) ->
           hc.validate(challenge).should.equal true
           done()
+        hc.generate parts.resource
