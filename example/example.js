@@ -95,10 +95,16 @@
       this._numTests = $("#num-tests").val();
       this._numBits = $("#num-bits").val();
       this._noWorkers = $("#no-workers").is(":checked");
-      console.log("loaded numTests", this._numTests, "numBits", this._numBits, "noWorkers", this._noWorkers);
+      this._numWorkers = $("#num-workers").val();
+      if (this._noWorkers) {
+        $("#num-workers").attr("disabled", "disabled");
+      } else {
+        $("#num-workers").removeAttr("disabled");
+      }
+      console.log("loaded numTests", this._numTests, "numBits", this._numBits, "noWorkers", this._noWorkers, "numWorkers", this._numWorkers);
       this._hc = new HashCash(this, this._numBits, (function(hashcash) {
         return this._hashCashCallback(hashcash);
-      }), this._noWorkers ? void 0 : WORKER_FILE);
+      }), this._noWorkers ? void 0 : WORKER_FILE, this._noWorkers ? void 0 : this._numWorkers);
       this._results = {
         num: 0,
         total_num: 0,

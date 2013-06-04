@@ -1,8 +1,6 @@
-os = require "os"
+os           = require "os"
 childProcess = require "child_process"
-hashcash = require("./hashcash")
-
-## TODO(jrubin) allow NUM_WORKERS to be configurable
+hashcash     = require("./hashcash")
 
 class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
@@ -48,7 +46,8 @@ class TaskMaster
     delete @sendFn
 
 class NodeTaskMaster extends (TaskMaster)
-  @NUM_WORKERS = if os.cpus? then os.cpus().length else 0
+  @MAX_NUM_WORKERS = if os.cpus? then os.cpus().length else 4
+  @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
 
   constructor: (caller, callback, range) ->
     super caller, callback, range
@@ -62,7 +61,8 @@ class NodeTaskMaster extends (TaskMaster)
   disconnect: -> @worker.disconnect()
 
 class WebTaskMaster extends (TaskMaster)
-  @NUM_WORKERS = 4
+  @MAX_NUM_WORKERS = 8
+  @DEFAULT_NUM_WORKERS = 4
 
   constructor: (caller, callback, range, @file) ->
     super caller, callback, range
@@ -78,7 +78,8 @@ class WebTaskMaster extends (TaskMaster)
 class TimeoutTaskMaster
   @MAX_RUNTIME = 99
   @YIELD_TIME = 1
-  @NUM_WORKERS = 1
+  @MAX_NUM_WORKERS = 1
+  @DEFAULT_NUM_WORKERS = 1
 
   constructor: (@_caller, @_callback) ->
 

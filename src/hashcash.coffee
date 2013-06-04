@@ -1,9 +1,8 @@
 ## we use our own sha1 instead of crypto for a more lean browser
 ## implementation with browserify
-sha1 = require "./sha1"
+sha1       = require "./sha1"
 taskmaster = require "./taskmaster"
 
-TaskMaster        = taskmaster.TaskMaster
 NodeTaskMaster    = taskmaster.NodeTaskMaster
 WebTaskMaster     = taskmaster.WebTaskMaster
 TimeoutTaskMaster = taskmaster.TimeoutTaskMaster
@@ -129,7 +128,7 @@ class HashCash
 
   ## INSTANCE
 
-  constructor: (@_caller, @_bits, @_callback, @_workerFile) ->
+  constructor: (@_caller, @_bits, @_callback, @_workerFile, @_numWorkers) ->
     @_bits = HashCash.MIN_BITS if @_bits < HashCash.MIN_BITS
     @_workers = []
 
@@ -143,8 +142,15 @@ class HashCash
   _workerGenerator: (type) ->
     return if @_workers.length
 
+    if @_numWorkers?
+      numWorkers = Math.min @_numWorkers, type.MAX_NUM_WORKERS
+    else
+      numWorkers = type.DEFAULT_NUM_WORKERS
+
+    console.log "using #{numWorkers} workers"
+
     @_workers = (
-      for id in [ 0 .. type.NUM_WORKERS - 1 ]
+      for num in [ 1 .. numWorkers ]
         new type @, @_workerCallback, @range, @_workerFile
     )
 

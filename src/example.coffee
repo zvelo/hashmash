@@ -83,14 +83,22 @@ class Tester
     @_numTests  = $("#num-tests").val()
     @_numBits   = $("#num-bits").val()
     @_noWorkers = $("#no-workers").is ":checked"
+    @_numWorkers = $("#num-workers").val()
+
+    if @_noWorkers
+      $("#num-workers").attr "disabled", "disabled"
+    else
+      $("#num-workers").removeAttr "disabled"
 
     console.log "loaded numTests", @_numTests,
                 "numBits", @_numBits,
-                "noWorkers", @_noWorkers
+                "noWorkers", @_noWorkers,
+                "numWorkers", @_numWorkers
 
     @_hc = new HashCash @, @_numBits,
       ((hashcash)-> @_hashCashCallback hashcash),
-      if @_noWorkers then undefined else WORKER_FILE
+      if @_noWorkers then undefined else WORKER_FILE,
+      if @_noWorkers then undefined else @_numWorkers
 
     @_results =
       num: 0
