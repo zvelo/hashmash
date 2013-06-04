@@ -211,7 +211,6 @@ return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require
         this._bits = HashCash.MIN_BITS;
       }
       this._workers = [];
-      this._completed = {};
     }
 
     HashCash.prototype._resetRange = function() {
@@ -221,29 +220,8 @@ return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require
       };
     };
 
-    HashCash.prototype._isComplete = function(challenge) {
-      return this._completed.hasOwnProperty(challenge);
-    };
-
-    HashCash.prototype._setComplete = function(challenge) {
-      var worker, _i, _len, _ref, _results;
-      this._completed[challenge] = true;
-      _ref = this._workers;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        worker = _ref[_i];
-        _results.push(worker.completed(challenge));
-      }
-      return _results;
-    };
-
-    HashCash.prototype._workerCallback = function(result, id, worker) {
-      var challenge;
-      challenge = result.substr(0, result.lastIndexOf(':'));
-      if (this._isComplete(challenge)) {
-        return;
-      }
-      this._setComplete(challenge);
+    HashCash.prototype._workerCallback = function(result, id) {
+      this.stop();
       return this._callback.call(this._caller, result);
     };
 
@@ -464,21 +442,38 @@ exports.exec = function () {};
   TaskMaster = (function() {
     TaskMaster.RANGE_INCREMENT = Math.pow(2, 15);
 
-    function TaskMaster(_caller, _id, _range, _callback, worker, _sendFn) {
+    function TaskMaster(_caller, id, _callback, _range) {
       this._caller = _caller;
-      this._id = _id;
-      this._range = _range;
+      this.id = id;
       this._callback = _callback;
-      this.worker = worker;
-      this._sendFn = _sendFn;
-      this._sendFn({
-        m: "id",
-        id: this._id
-      });
+      this._range = _range;
     }
 
+    TaskMaster.prototype._send = function(data) {
+      this._spawn();
+      if (this.sendFn == null) {
+        return;
+      }
+      return this.sendFn(data);
+    };
+
+    TaskMaster.prototype._spawn = function() {
+      if (this.worker != null) {
+        return;
+      }
+      this.connect();
+      return this.sendId();
+    };
+
+    TaskMaster.prototype.sendId = function() {
+      return this._send({
+        m: "id",
+        id: this.id
+      });
+    };
+
     TaskMaster.prototype.sendData = function(data) {
-      return this._sendFn({
+      return this._send({
         m: "data",
         data: data
       });
@@ -493,7 +488,7 @@ exports.exec = function () {};
     TaskMaster.prototype._sendRange = function() {
       var range;
       range = this._nextRange();
-      return this._sendFn({
+      return this._send({
         m: "range",
         range: range
       });
@@ -503,7 +498,7 @@ exports.exec = function () {};
       if (result == null) {
         return;
       }
-      return this._callback.call(this._caller, result, id, this.worker);
+      return this._callback.call(this._caller, result, id);
     };
 
     TaskMaster.prototype._gotMessage = function(msg) {
@@ -521,16 +516,12 @@ exports.exec = function () {};
     };
 
     TaskMaster.prototype.stop = function() {
-      return this._sendFn({
-        m: "stop"
-      });
-    };
-
-    TaskMaster.prototype.completed = function(challenge) {
-      return this._sendFn({
-        m: "completed",
-        challenge: challenge
-      });
+      if (this.worker == null) {
+        return;
+      }
+      this.disconnect();
+      delete this.worker;
+      return delete this.sendFn;
     };
 
     return TaskMaster;
@@ -543,17 +534,20 @@ exports.exec = function () {};
     NodeTaskMaster.NUM_WORKERS = os.cpus != null ? os.cpus().length : 0;
 
     function NodeTaskMaster(caller, id, callback, range) {
-      var me, sendFn, worker;
-      worker = childProcess.fork(__dirname + "/worker.js");
-      me = this;
-      worker.on("message", function(data) {
-        return me._gotMessage(data);
-      });
-      sendFn = function(data) {
-        return worker.send(data);
-      };
-      NodeTaskMaster.__super__.constructor.call(this, caller, id, range, callback, worker, sendFn);
+      NodeTaskMaster.__super__.constructor.call(this, caller, id, callback, range);
     }
+
+    NodeTaskMaster.prototype.connect = function() {
+      var me;
+      this.worker = childProcess.fork(__dirname + "/worker.js");
+      me = this;
+      this.worker.on("message", function(data) {
+        return me._gotMessage.call(me, data);
+      });
+      return this.sendFn = function(data) {
+        return this.worker.send(data);
+      };
+    };
 
     NodeTaskMaster.prototype.disconnect = function() {
       return this.worker.disconnect();
@@ -569,17 +563,21 @@ exports.exec = function () {};
     WebTaskMaster.NUM_WORKERS = 4;
 
     function WebTaskMaster(caller, id, callback, range, file) {
-      var me, sendFn, worker;
-      worker = new Worker(file);
-      me = this;
-      worker.onmessage = function(event) {
-        return me._gotMessage(event.data);
-      };
-      sendFn = function(data) {
-        return worker.postMessage(data);
-      };
-      WebTaskMaster.__super__.constructor.call(this, caller, id, range, callback, worker, sendFn);
+      this.file = file;
+      WebTaskMaster.__super__.constructor.call(this, caller, id, callback, range);
     }
+
+    WebTaskMaster.prototype.connect = function() {
+      var me;
+      this.worker = new Worker(this.file);
+      me = this;
+      this.worker.onmessage = function(event) {
+        return me._gotMessage.call(me, event.data);
+      };
+      return this.sendFn = function(data) {
+        return this.worker.postMessage(data);
+      };
+    };
 
     WebTaskMaster.prototype.disconnect = function() {
       return this.worker.terminate();
@@ -596,9 +594,9 @@ exports.exec = function () {};
 
     TimeoutTaskMaster.NUM_WORKERS = 1;
 
-    function TimeoutTaskMaster(_caller, _id, _callback) {
+    function TimeoutTaskMaster(_caller, id, _callback) {
       this._caller = _caller;
-      this._id = _id;
+      this.id = id;
       this._callback = _callback;
     }
 
@@ -628,10 +626,6 @@ exports.exec = function () {};
 
     TimeoutTaskMaster.prototype.stop = function() {
       return this._stopFlag = true;
-    };
-
-    TimeoutTaskMaster.prototype.completed = function() {
-      return this.stop();
     };
 
     return TimeoutTaskMaster;

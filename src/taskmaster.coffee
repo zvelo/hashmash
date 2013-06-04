@@ -7,11 +7,21 @@ hashcash = require("./hashcash")
 class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
 
-  constructor: (@_caller, @_id, @_range, @_callback, @worker, @_sendFn) ->
-    @_sendFn m: "id", id: @_id
+  constructor: (@_caller, @id, @_callback, @_range) ->
 
-  sendData: (data) ->
-    @_sendFn m: "data", data: data
+  _send: (data) ->
+    @_spawn()
+    return unless @sendFn?
+    @sendFn data
+
+  _spawn: ->
+    return if @worker?
+    @connect()
+    @sendId()
+
+  sendId: -> @_send m: "id", id: @id
+
+  sendData: (data) -> @_send m: "data", data: data
 
   _nextRange: ->
     @_range.begin = @_range.end + 1
@@ -20,11 +30,11 @@ class TaskMaster
 
   _sendRange: ->
     range = @_nextRange()
-    @_sendFn m: "range", range: range
+    @_send m: "range", range: range
 
   _gotResult: (id, result) ->
     return unless result?
-    @_callback.call @_caller, result, id, @worker
+    @_callback.call @_caller, result, id
 
   _gotMessage: (msg) ->
     return unless msg?.m?
@@ -34,35 +44,37 @@ class TaskMaster
       when "result" then @_gotResult msg.id, msg.result
       when "console_log" then console.log "worker #{msg.id}", msg.data
 
-  stop: -> @_sendFn m: "stop"
-  completed: (challenge) -> @_sendFn m: "completed", challenge: challenge
+  stop: ->
+    return unless @worker?
+    @disconnect()
+    delete @worker
+    delete @sendFn
 
 class NodeTaskMaster extends (TaskMaster)
   @NUM_WORKERS = if os.cpus? then os.cpus().length else 0
 
   constructor: (caller, id, callback, range) ->
-    worker = childProcess.fork __dirname + "/worker.js"
+    super caller, id, callback, range
 
+  connect: ->
+    @worker = childProcess.fork __dirname + "/worker.js"
     me = @
-    worker.on "message", (data) -> me._gotMessage data
-
-    sendFn = (data) -> worker.send data
-
-    super caller, id, range, callback, worker, sendFn
+    @worker.on "message", (data) -> me._gotMessage.call me, data
+    @sendFn = (data) -> @worker.send data
 
   disconnect: -> @worker.disconnect()
 
 class WebTaskMaster extends (TaskMaster)
   @NUM_WORKERS = 4
 
-  constructor: (caller, id, callback, range, file) ->
-    worker = new Worker file
+  constructor: (caller, id, callback, range, @file) ->
+    super caller, id, callback, range
 
+  connect: ->
+    @worker = new Worker @file
     me = @
-    worker.onmessage = (event) -> me._gotMessage event.data
-    sendFn = (data) -> worker.postMessage data
-
-    super caller, id, range, callback, worker, sendFn
+    @worker.onmessage = (event) -> me._gotMessage.call me, event.data
+    @sendFn = (data) -> @worker.postMessage data
 
   disconnect: -> @worker.terminate()
 
@@ -71,7 +83,7 @@ class TimeoutTaskMaster
   @YIELD_TIME = 1
   @NUM_WORKERS = 1
 
-  constructor: (@_caller, @_id, @_callback) ->
+  constructor: (@_caller, @id, @_callback) ->
 
   sendData: (@_data) ->
     delete @_stopFlag
@@ -93,7 +105,6 @@ class TimeoutTaskMaster
       setTimeout (-> me.start.call me), TimeoutTaskMaster.YIELD_TIME
 
   stop: -> @_stopFlag = true
-  completed: -> @stop()
 
 exports.TaskMaster        = TaskMaster
 exports.NodeTaskMaster    = NodeTaskMaster

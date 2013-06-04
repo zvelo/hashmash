@@ -136,25 +136,15 @@ class HashCash
   constructor: (@_caller, @_bits, @_callback, @_workerFile) ->
     @_bits = HashCash.MIN_BITS if @_bits < HashCash.MIN_BITS
     @_workers = []
-    @_completed = {}
 
   _resetRange: ->
     @range =
       begin: 0
       end: -1
 
-  _isComplete: (challenge) ->
-    return @_completed.hasOwnProperty(challenge)
-
-  _setComplete: (challenge) ->
-    @_completed[challenge] = true
-    worker.completed challenge for worker in @_workers
-
-  _workerCallback: (result, id, worker) ->
+  _workerCallback: (result, id) ->
     ## prevent races where multiple workers returned a result
-    challenge = result.substr 0, result.lastIndexOf(':')
-    return if @_isComplete challenge
-    @_setComplete challenge
+    @stop()
     @_callback.call @_caller, result
 
   _workerGenerator: (type) ->
