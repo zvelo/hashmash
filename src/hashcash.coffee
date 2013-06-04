@@ -97,11 +97,7 @@ class HashCash
 
     data = {}
 
-    pos =
-      start: 0
-      end: -1
-      length: ->
-        @end - @start
+    pos = start: 0, end: -1, length: -> @end - @start
 
     return null if not nextPos str, pos
     data.version = parseInt str.substr(pos.start, pos.length()), 10
@@ -137,25 +133,19 @@ class HashCash
     @_bits = HashCash.MIN_BITS if @_bits < HashCash.MIN_BITS
     @_workers = []
 
-  _resetRange: ->
-    @range =
-      begin: 0
-      end: -1
+  _resetRange: -> @range = begin: 0, end: -1
 
-  _workerCallback: (result, id) ->
+  _workerCallback: (result) ->
     ## prevent races where multiple workers returned a result
     @stop()
     @_callback.call @_caller, result
 
   _workerGenerator: (type) ->
-    ## TODO(jrubin) make workers static variables
-    ## and only create if non-existant
-
     return if @_workers.length
 
     @_workers = (
       for id in [ 0 .. type.NUM_WORKERS - 1 ]
-        new type @, id, @_workerCallback, @range, @_workerFile
+        new type @, @_workerCallback, @range, @_workerFile
     )
 
   _sendData: (data) -> worker.sendData data for worker in @_workers

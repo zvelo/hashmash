@@ -7,7 +7,6 @@ if self?
       args = Array::slice.call arguments
       drone.sendFn
         m: "console_log",
-        id: if drone.id? then drone.id else -1
         data: args
 
 class Drone
@@ -20,47 +19,32 @@ class Drone
     return unless msg.m?
 
     switch msg.m
-      when "id"        then @_gotId       msg.id
-      when "data"      then @_gotData     msg.data
-      when "range"     then @_gotRange    msg.range
-
-  _gotId: (value) ->
-    return unless value?
-    @id = value
+      when "data"  then @_gotData  msg.data
+      when "range" then @_gotRange msg.range
 
   _gotData: (value) ->
-    return unless value? and @id?
+    return unless value?
 
     @_data = value
     @_requestRange()
 
   _gotRange: (value) ->
-    return unless value? and @id?
+    return unless value?
 
     @_range = value
     @_data.counter = @_range.begin
     @start()
 
-  _requestRange: ->
-    return unless @id?
-
-    @sendFn
-      m: "request_range"
-      id: @id
+  _requestRange: -> @sendFn m: "request_range"
 
   _sendResult: ->
-    return unless @_data.result? and @id?
-
-    @sendFn
-      m: "result"
-      id: @id
-      result: @_data.result
+    return unless @_data.result?
+    @sendFn m: "result", result: @_data.result
 
   start: ->
     return unless @_data? and @_range?
 
-    until @_data.result? or
-          @_data.counter is @_range.end
+    until @_data.result? or @_data.counter is @_range.end
       HashCash.testSha @_data
 
     if @_data.result?

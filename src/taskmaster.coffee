@@ -7,7 +7,7 @@ hashcash = require("./hashcash")
 class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
 
-  constructor: (@_caller, @id, @_callback, @_range) ->
+  constructor: (@_caller, @_callback, @_range) ->
 
   _send: (data) ->
     @_spawn()
@@ -17,9 +17,6 @@ class TaskMaster
   _spawn: ->
     return if @worker?
     @connect()
-    @sendId()
-
-  sendId: -> @_send m: "id", id: @id
 
   sendData: (data) -> @_send m: "data", data: data
 
@@ -32,17 +29,17 @@ class TaskMaster
     range = @_nextRange()
     @_send m: "range", range: range
 
-  _gotResult: (id, result) ->
+  _gotResult: (result) ->
     return unless result?
-    @_callback.call @_caller, result, id
+    @_callback.call @_caller, result
 
   _gotMessage: (msg) ->
     return unless msg?.m?
 
     switch msg.m
       when "request_range" then @_sendRange()
-      when "result" then @_gotResult msg.id, msg.result
-      when "console_log" then console.log "worker #{msg.id}", msg.data
+      when "result" then @_gotResult msg.result
+      when "console_log" then console.log "worker", msg.data
 
   stop: ->
     return unless @worker?
@@ -53,8 +50,8 @@ class TaskMaster
 class NodeTaskMaster extends (TaskMaster)
   @NUM_WORKERS = if os.cpus? then os.cpus().length else 0
 
-  constructor: (caller, id, callback, range) ->
-    super caller, id, callback, range
+  constructor: (caller, callback, range) ->
+    super caller, callback, range
 
   connect: ->
     @worker = childProcess.fork __dirname + "/worker.js"
@@ -67,8 +64,8 @@ class NodeTaskMaster extends (TaskMaster)
 class WebTaskMaster extends (TaskMaster)
   @NUM_WORKERS = 4
 
-  constructor: (caller, id, callback, range, @file) ->
-    super caller, id, callback, range
+  constructor: (caller, callback, range, @file) ->
+    super caller, callback, range
 
   connect: ->
     @worker = new Worker @file
@@ -83,7 +80,7 @@ class TimeoutTaskMaster
   @YIELD_TIME = 1
   @NUM_WORKERS = 1
 
-  constructor: (@_caller, @id, @_callback) ->
+  constructor: (@_caller, @_callback) ->
 
   sendData: (@_data) ->
     delete @_stopFlag

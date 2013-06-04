@@ -80,7 +80,6 @@ process.chdir = function (dir) {
         args = Array.prototype.slice.call(arguments);
         return drone.sendFn({
           m: "console_log",
-          id: drone.id != null ? drone.id : -1,
           data: args
         });
       }
@@ -101,8 +100,6 @@ process.chdir = function (dir) {
         return;
       }
       switch (msg.m) {
-        case "id":
-          return this._gotId(msg.id);
         case "data":
           return this._gotData(msg.data);
         case "range":
@@ -110,15 +107,8 @@ process.chdir = function (dir) {
       }
     };
 
-    Drone.prototype._gotId = function(value) {
-      if (value == null) {
-        return;
-      }
-      return this.id = value;
-    };
-
     Drone.prototype._gotData = function(value) {
-      if (!((value != null) && (this.id != null))) {
+      if (value == null) {
         return;
       }
       this._data = value;
@@ -126,7 +116,7 @@ process.chdir = function (dir) {
     };
 
     Drone.prototype._gotRange = function(value) {
-      if (!((value != null) && (this.id != null))) {
+      if (value == null) {
         return;
       }
       this._range = value;
@@ -135,22 +125,17 @@ process.chdir = function (dir) {
     };
 
     Drone.prototype._requestRange = function() {
-      if (this.id == null) {
-        return;
-      }
       return this.sendFn({
-        m: "request_range",
-        id: this.id
+        m: "request_range"
       });
     };
 
     Drone.prototype._sendResult = function() {
-      if (!((this._data.result != null) && (this.id != null))) {
+      if (this._data.result == null) {
         return;
       }
       return this.sendFn({
         m: "result",
-        id: this.id,
         result: this._data.result
       });
     };
@@ -402,7 +387,7 @@ process.chdir = function (dir) {
       };
     };
 
-    HashCash.prototype._workerCallback = function(result, id) {
+    HashCash.prototype._workerCallback = function(result) {
       this.stop();
       return this._callback.call(this._caller, result);
     };
@@ -416,7 +401,7 @@ process.chdir = function (dir) {
         var _i, _ref, _results;
         _results = [];
         for (id = _i = 0, _ref = type.NUM_WORKERS - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; id = 0 <= _ref ? ++_i : --_i) {
-          _results.push(new type(this, id, this._workerCallback, this.range, this._workerFile));
+          _results.push(new type(this, this._workerCallback, this.range, this._workerFile));
         }
         return _results;
       }).call(this);
@@ -624,9 +609,8 @@ exports.exec = function () {};
   TaskMaster = (function() {
     TaskMaster.RANGE_INCREMENT = Math.pow(2, 15);
 
-    function TaskMaster(_caller, id, _callback, _range) {
+    function TaskMaster(_caller, _callback, _range) {
       this._caller = _caller;
-      this.id = id;
       this._callback = _callback;
       this._range = _range;
     }
@@ -643,15 +627,7 @@ exports.exec = function () {};
       if (this.worker != null) {
         return;
       }
-      this.connect();
-      return this.sendId();
-    };
-
-    TaskMaster.prototype.sendId = function() {
-      return this._send({
-        m: "id",
-        id: this.id
-      });
+      return this.connect();
     };
 
     TaskMaster.prototype.sendData = function(data) {
@@ -676,11 +652,11 @@ exports.exec = function () {};
       });
     };
 
-    TaskMaster.prototype._gotResult = function(id, result) {
+    TaskMaster.prototype._gotResult = function(result) {
       if (result == null) {
         return;
       }
-      return this._callback.call(this._caller, result, id);
+      return this._callback.call(this._caller, result);
     };
 
     TaskMaster.prototype._gotMessage = function(msg) {
@@ -691,9 +667,9 @@ exports.exec = function () {};
         case "request_range":
           return this._sendRange();
         case "result":
-          return this._gotResult(msg.id, msg.result);
+          return this._gotResult(msg.result);
         case "console_log":
-          return console.log("worker " + msg.id, msg.data);
+          return console.log("worker", msg.data);
       }
     };
 
@@ -715,8 +691,8 @@ exports.exec = function () {};
 
     NodeTaskMaster.NUM_WORKERS = os.cpus != null ? os.cpus().length : 0;
 
-    function NodeTaskMaster(caller, id, callback, range) {
-      NodeTaskMaster.__super__.constructor.call(this, caller, id, callback, range);
+    function NodeTaskMaster(caller, callback, range) {
+      NodeTaskMaster.__super__.constructor.call(this, caller, callback, range);
     }
 
     NodeTaskMaster.prototype.connect = function() {
@@ -744,9 +720,9 @@ exports.exec = function () {};
 
     WebTaskMaster.NUM_WORKERS = 4;
 
-    function WebTaskMaster(caller, id, callback, range, file) {
+    function WebTaskMaster(caller, callback, range, file) {
       this.file = file;
-      WebTaskMaster.__super__.constructor.call(this, caller, id, callback, range);
+      WebTaskMaster.__super__.constructor.call(this, caller, callback, range);
     }
 
     WebTaskMaster.prototype.connect = function() {
@@ -776,9 +752,8 @@ exports.exec = function () {};
 
     TimeoutTaskMaster.NUM_WORKERS = 1;
 
-    function TimeoutTaskMaster(_caller, id, _callback) {
+    function TimeoutTaskMaster(_caller, _callback) {
       this._caller = _caller;
-      this.id = id;
       this._callback = _callback;
     }
 
