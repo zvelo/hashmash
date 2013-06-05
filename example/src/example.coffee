@@ -95,7 +95,7 @@ class Tester
                 "noWorkers", @_noWorkers,
                 "numWorkers", @_numWorkers
 
-    @_hc = new HashCash @, @_numBits,
+    @_hc = new HashCash this, @_numBits,
       ((hashcash)-> @_hashCashCallback hashcash),
       if @_noWorkers then undefined else WORKER_FILE,
       if @_noWorkers then undefined else @_numWorkers

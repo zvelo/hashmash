@@ -151,7 +151,7 @@ class HashCash
 
     @_workers = (
       for num in [ 1 .. numWorkers ]
-        new type @, @_workerCallback, @range, @_workerFile
+        new type this, @_workerCallback, @range, @_workerFile
     )
 
   _sendData: (data) -> worker.sendData data for worker in @_workers

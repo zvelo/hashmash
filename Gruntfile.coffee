@@ -25,7 +25,34 @@ module.exports = (grunt) ->
         dest: "example/js"
         ext: ".js"
 
-    ## TODO(jrubin) coffeelint
+    coffeelint:
+      options:
+        no_tabs: level: "error"
+        no_trailing_whitespace: level: "error", allowed_in_comments: false
+        max_line_length: value: 80, level: "warn"
+        camel_case_classes: level: "error"
+        indentation: value: 2, level: "error"
+        no_implicit_braces: level: "ignore"
+        no_trailing_semicolons: level: "error"
+        no_plusplus: level: "warn"
+        no_throwing_strings: level: "error"
+        cyclomatic_complexity: value: 10, level: "ignore"
+        no_backticks: level: "error"
+        line_endings: level: "warn", value: "unix"
+        no_implicit_parens: level: "ignore"
+        empty_constructor_needs_parens: level: "ignore"
+        non_empty_constructor_needs_parens: level: "ignore"
+        no_empty_param_list: level: "warn"
+        space_operators: level: "warn"
+        duplicate_key: level: "error"
+        newlines_after_classes: value: 3, level: "warn"
+        no_stand_alone_at: level: "warn"
+        arrow_spacing: level: "warn"
+        coffeescript_error: level: "error"
+      src: "src/*.coffee"
+      test: "test/*.coffee"
+      example: "example/src/*.coffee"
+      root: "*.coffee"
 
     browserify:
       hashcash:
@@ -80,19 +107,26 @@ module.exports = (grunt) ->
     watch:
       src:
         files: "src/*.coffee"
-        tasks: "coffee:lib"
+        tasks: [ "coffeelint:src", "coffee:lib" ]
       browser:
         files: "lib/*.js"
         tasks: [ "browserify", "concat:copyright", "clean:tmp" ]
       example:
         files: "example/src/*.coffee"
-        tasks: "coffee:example"
+        tasks: [ "coffeelint:example", "coffee:example" ]
       min:
         files: [ "browser/*.js", "!browser/*.min.js" ]
         tasks: "uglify"
+      test:
+        files: "test/*.coffee"
+        tasks: [ "coffeelint:test", "test" ]
+      root:
+        files: "*.coffee"
+        tasks: "coffeelint:root"
 
   grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
+  grunt.loadNpmTasks "grunt-coffeelint"
   grunt.loadNpmTasks "grunt-contrib-clean"
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-coffee"
@@ -103,8 +137,13 @@ module.exports = (grunt) ->
     "cafemocha"
   ]
 
+  grunt.registerTask "lint", [
+    "coffeelint"
+  ]
+
   grunt.registerTask "default", [
     "clean"
+    "lint"
     "coffee"
     "browserify"
     "concat"

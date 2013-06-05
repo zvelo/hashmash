@@ -54,7 +54,7 @@ class NodeTaskMaster extends (TaskMaster)
 
   connect: ->
     @worker = childProcess.fork __dirname + "/worker.js"
-    me = @
+    me = this
     @worker.on "message", (data) -> me._gotMessage.call me, data
     @sendFn = (data) -> @worker.send data
 
@@ -69,7 +69,7 @@ class WebTaskMaster extends (TaskMaster)
 
   connect: ->
     @worker = new Worker @file
-    me = @
+    me = this
     @worker.onmessage = (event) -> me._gotMessage.call me, event.data
     @sendFn = (data) -> @worker.postMessage data
 
@@ -99,7 +99,7 @@ class TimeoutTaskMaster
     else if @_data.result?
       @_callback.call @_caller, @_data.result
     else
-      me = @
+      me = this
       setTimeout (-> me.start.call me), TimeoutTaskMaster.YIELD_TIME
 
   stop: -> @_stopFlag = true
