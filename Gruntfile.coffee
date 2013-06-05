@@ -22,7 +22,7 @@ module.exports = (grunt) ->
         flatten: true
         cwd: "example/src"
         src: "*.coffee"
-        dest: "example/js"
+        dest: "example/public/js"
         ext: ".js"
 
     coffeelint:
@@ -51,7 +51,7 @@ module.exports = (grunt) ->
         coffeescript_error: level: "error"
       src: "src/*.coffee"
       test: "test/*.coffee"
-      example: "example/src/*.coffee"
+      example: [ "example/*.coffee", "example/src/*.coffee" ]
       root: "*.coffee"
 
     browserify:
@@ -112,7 +112,7 @@ module.exports = (grunt) ->
         files: "lib/*.js"
         tasks: [ "browserify", "concat:copyright", "clean:tmp" ]
       example:
-        files: "example/src/*.coffee"
+        files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "coffee:example" ]
       min:
         files: [ "browser/*.js", "!browser/*.min.js" ]

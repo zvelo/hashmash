@@ -1,7 +1,7 @@
 resource = "zvelo.com"
 HashCash = hashcash.HashCash
 
-WORKER_FILE = "../browser/hashcash_worker.js"
+WORKER_FILE = "js/hashcash_worker.js"
 
 class Tester
   @STATUS_STOPPED: 0
@@ -48,7 +48,11 @@ class Tester
 
     return unless @status is Tester.STATUS_RUNNING
 
-    $("#toggle-status").text "Stop"
+    $("#toggle-status")
+      .text("Stop")
+      .addClass("btn-danger")
+      .removeClass("btn-primary")
+
     $("#num-tests").attr "disabled", "disabled"
     $("#status").text "running"
 
@@ -68,7 +72,11 @@ class Tester
 
     @status = Tester.STATUS_STOPPED
 
-    $("#toggle-status").text "Start"
+    $("#toggle-status")
+      .text("Start")
+      .addClass("btn-primary")
+      .removeClass("btn-danger")
+
     $("#num-tests").removeAttr "disabled"
     $("#status").text "stopped"
 

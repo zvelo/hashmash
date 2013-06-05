@@ -1,32 +1,75 @@
-<!doctype html>
-<html lang=en>
-<head>
-<meta charset=utf-8>
-<title></title>
-</head>
-<body>
-<input type="number" name="num-tests" id="num-tests" min="1" max="99" value="10" onchange="tester.setNumTests(this)">
-<label for="num-tests">tests to run</label>
-<br>
-<input type="number" name="num-bits" id="num-bits" min="1" max="99" value="16" onchange="tester.reset()">
-<label for="num-bits">bit complexity</label>
-<br>
-<input type="checkbox" id="no-workers" name="no-workers" onchange="tester.reset()">
-<label for="no-workers">disable Web Workers</label>
-<br>
-<input type="number" name="num-workers" id="num-workers" min="1" max="99" value="4" onchange="tester.reset()">
-<label for="num-workers">workers</label>
-<br>
-<button id="toggle-status" onclick="tester.toggle()">Start</button>
-<pre>
-number of tests:  <span id="test-number">0</span>
-minimum duration: <span id="minimum-duration">0</span>s
-average duration: <span id="average-duration">0</span>s
-maximum duration: <span id="maximum-duration">0</span>s
-status:           <span id="status">stopped</span>
-</pre>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
-<script src="../browser/hashcash.js"></script>
-<script src="js/example.js"></script>
-</body>
-</html>
+extends layout
+
+mixin number(name, value, onchange, text)
+  .control-group
+    label.control-label(for=name)= text
+    .controls
+      input.input-mini(
+        type     = "number"
+        min      = "1"
+        max      = "99"
+        id       = name
+        name     = name
+        value    = value
+        onchange = onchange
+      )
+
+mixin check(name, onchange, text)
+  .control-group
+    .controls
+      label.checkbox(for=name)
+        input(
+          type     = "checkbox"
+          id       = name
+          name     = name
+          onchange = onchange
+        )
+        | #{text}
+
+mixin result(text, id, value, suffix)
+  tr
+    td #{text}:
+    td
+      span(id=id) #{value}
+      | #{suffix}
+
+block form
+  form.form-horizontal
+    fieldset
+      mixin number("num-tests", "10", "tester.setNumTests(this)", "Number of tests to run")
+      mixin number("num-bits", "16", "tester.reset()", "Bit complexity")
+      mixin check("no-workers", "tester.reset()", "Disable Web Workers")
+      mixin number("num-workers", "4", "tester.reset()", "Number of workers")
+
+      .form-actions
+        button#toggle-status.btn.btn-primary(type="submit", onclick="tester.toggle(); return false") Start
+
+block results
+  // bootstrap's tables have nice styling,
+  // so we use tables instead of a grid here
+  table.table.table-striped.table-hover
+    thead
+      tr
+        th.span2 Name
+        th.span6 Result
+    tbody
+      mixin result("Number of tests", "test-number", 0)
+      mixin result("Minimum duration", "minimum-duration", 0, "s")
+      mixin result("Average duration", "average-duration", 0, "s")
+      mixin result("Maximum duration", "maximum-duration", 0, "s")
+      mixin result("Status", "status", "stopped")
+
+block content
+  .row
+    .offset4.span8
+      h1= title
+
+  .row
+    .span4
+      block form
+    .span8
+      block results
+
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js")
+  script(src="js/hashcash.js")
+  script(src="js/example.js")

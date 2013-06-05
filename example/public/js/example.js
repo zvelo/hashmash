@@ -5,7 +5,7 @@
 
   HashCash = hashcash.HashCash;
 
-  WORKER_FILE = "../browser/hashcash_worker.js";
+  WORKER_FILE = "js/hashcash_worker.js";
 
   Tester = (function() {
     Tester.STATUS_STOPPED = 0;
@@ -63,7 +63,7 @@
       if (this.status !== Tester.STATUS_RUNNING) {
         return;
       }
-      $("#toggle-status").text("Stop");
+      $("#toggle-status").text("Stop").addClass("btn-danger").removeClass("btn-primary");
       $("#num-tests").attr("disabled", "disabled");
       $("#status").text("running");
       this._results.num += 1;
@@ -79,7 +79,7 @@
       console.log("stopping");
       this._hc.stop();
       this.status = Tester.STATUS_STOPPED;
-      $("#toggle-status").text("Start");
+      $("#toggle-status").text("Start").addClass("btn-primary").removeClass("btn-danger");
       $("#num-tests").removeAttr("disabled");
       return $("#status").text("stopped");
     };
