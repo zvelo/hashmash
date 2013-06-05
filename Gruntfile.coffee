@@ -65,7 +65,7 @@ module.exports = (grunt) ->
         expand: true
         flatten: true
         cwd: "browser"
-        src: "*.js"
+        src: [ "*.js", "!*.min.js" ]
         dest: "browser"
         ext: ".min.js"
 
@@ -77,9 +77,24 @@ module.exports = (grunt) ->
         timeout: 5000
       src: "test/*.coffee"
 
+    watch:
+      src:
+        files: "src/*.coffee"
+        tasks: "coffee:lib"
+      browser:
+        files: "lib/*.js"
+        tasks: [ "browserify", "concat:copyright", "clean:tmp" ]
+      example:
+        files: "example/src/*.coffee"
+        tasks: "coffee:example"
+      min:
+        files: [ "browser/*.js", "!browser/*.min.js" ]
+        tasks: "uglify"
+
   grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
   grunt.loadNpmTasks "grunt-contrib-clean"
+  grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-uglify"
