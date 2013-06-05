@@ -20,10 +20,13 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "browserify": "2.x.x",
-    "coffee-script": "1.x.x",
-    "mocha": "1.x.x",
     "should": "1.x.x",
-    "uglify-js": "2.x.x"
+    "grunt": "0.x.x",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-browserify": "git://github.com/zvelo/grunt-browserify.git",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-cafe-mocha": "~0.1.4"
   }
 }

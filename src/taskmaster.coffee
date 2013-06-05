@@ -1,6 +1,6 @@
 os           = require "os"
 childProcess = require "child_process"
-hashcash     = require("./hashcash")
+hashcash     = require "./hashcash"
 
 class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
