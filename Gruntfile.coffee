@@ -112,16 +112,16 @@ module.exports = (grunt) ->
     watch:
       src:
         files: "src/*.coffee"
-        tasks: [ "lint:src", "build:node", "build:browser", "test" ]
+        tasks: [ "coffeelint:src", "build:node", "build:browser", "test" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
-        tasks: [ "lint:example", "build:example" ]
+        tasks: [ "coffeelint:example", "build:example" ]
       test:
         files: "test/*.coffee"
-        tasks: [ "lint:test", "test" ]
+        tasks: [ "coffeelint:test", "test" ]
       root:
         files: "*.coffee"
-        tasks: "lint:root"
+        tasks: "coffeelint:root"
 
     build:
       node:
@@ -141,7 +141,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-uglify"
 
   grunt.registerTask     "test", [  "cafemocha" ]
-  grunt.registerTask     "lint", [ "coffeelint" ]
   grunt.registerTask "minimize", [     "uglify" ]
 
   grunt.registerMultiTask "build", "Build project files", ->
@@ -157,6 +156,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask "default", [
     "clean"
-    "lint"
+    "coffeelint"
     "build"
   ]
