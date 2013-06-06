@@ -1,4 +1,6 @@
-sha1 = require "./sha1"
+"use strict"
+
+sha1 = require "./sha1.coffee"
 
 if self?
   self.console =
