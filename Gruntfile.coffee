@@ -147,6 +147,14 @@ module.exports = (grunt) ->
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
 
+  exampleServer = require "./example/server"
+
+  grunt.registerTask "example", "Start the example web server", ->
+    done = @async() ## by never calling done, the server is kept alive
+    port = process.env.PORT or 3000
+    exampleServer.listen port, ->
+      grunt.log.writeln "Example server listening on port #{port}"
+
   grunt.registerTask "default", [
     "clean"
     "lint"

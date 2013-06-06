@@ -22,6 +22,7 @@
   "devDependencies": {
     "jade": "0.x.x",
     "should": "1.x.x",
+    "tiny-lr": "0.x.x",
     "express": "3.x.x",
     "grunt": "0.x.x",
     "grunt-browserify": "1.x.x",
