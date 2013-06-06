@@ -2,13 +2,10 @@
 
 ## we use our own sha1 instead of crypto for a more lean browser
 ## implementation with browserify
-sha1       = require "./sha1.coffee"
-taskmaster = require "./taskmaster.coffee"
-properties = require "./properties.coffee"
+sha1       = require "./sha1"
+properties = require "./properties"
 
-NodeTaskMaster    = taskmaster.NodeTaskMaster
-WebTaskMaster     = taskmaster.WebTaskMaster
-TimeoutTaskMaster = taskmaster.TimeoutTaskMaster
+{ NodeTaskMaster, WebTaskMaster, TimeoutTaskMaster } = require "./taskmaster"
 
 ## hashcash format:
 ## ver:bits:date:resource:rand:counter

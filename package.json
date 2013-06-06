@@ -18,15 +18,13 @@
     "build": "make",
     "test": "make test"
   },
-  "dependencies": {
-    "coffee-script": "1.x.x"
-  },
+  "dependencies": {},
   "devDependencies": {
     "jade": "0.x.x",
     "should": "1.x.x",
     "express": "3.x.x",
     "grunt": "0.x.x",
-    "grunt-coffeeify": "0.x.x",
+    "grunt-browserify": "1.x.x",
     "grunt-cafe-mocha": "0.x.x",
     "grunt-coffeelint": "0.x.x",
     "grunt-contrib-clean": "0.x.x",

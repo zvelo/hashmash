@@ -1,2 +1,2 @@
 "use strict"
-window.HashCash = require "./hashcash.coffee"
+window.HashCash = require "./hashcash"

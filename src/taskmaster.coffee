@@ -2,8 +2,8 @@
 
 #os           = require "os"
 childProcess = require "child_process"
-sha1         = require "./sha1.coffee"
-properties   = require "./properties.coffee"
+sha1         = require "./sha1"
+properties   = require "./properties"
 
 TIMEOUT_MAX_RUNTIME = 99
 TIMEOUT_YIELD_TIME  =  1
