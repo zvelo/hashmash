@@ -17,7 +17,7 @@ f = (s, x, y, z) ->
     when 2 then (x & y) ^ (x & z) ^ (y & z)  ## Maj()
     when 3 then x ^ y ^ z                    ## Parity()
 
-exports.hash = (msg) ->
+_sha1hash = (msg) ->
   ## constants [4.2.1]
   K = [
     0x5a827999
@@ -110,3 +110,42 @@ exports.hash = (msg) ->
          toHexStr(H2) +
          toHexStr(H3) +
          toHexStr(H4)
+
+_leading0s = (hexStr) ->
+  num = 0
+  for pos in [ 0 .. hexStr.length - 1 ]
+    curNum = parseInt hexStr[pos], 16
+    break if isNaN curNum
+
+    switch curNum
+      when 0b0000                         then num += 4  ## continue
+      when 0b0001                         then return num + 3
+      when 0b0010, 0b0011                 then return num + 2
+      when 0b0100, 0b0101, 0b0110, 0b0111 then return num + 1
+      else return num
+
+  num
+
+_tryChallenge = (data) ->
+  challenge = "#{data.challenge}:#{data.counter}"
+  sha = _sha1hash challenge
+
+  if _leading0s(sha) >= data.bits
+    data.result = challenge
+    return true
+
+  data.counter += 1
+  return false
+
+sha1              = (msg)    -> _sha1hash(msg)
+sha1.leading0s    = (hexStr) -> _leading0s(hexStr)
+sha1.tryChallenge = (data)   -> _tryChallenge(data)
+
+hidden =
+  writable:     false
+  enumerable:   false
+  configurable: false
+
+Object.defineProperty sha1, key, hidden for own key of sha1
+
+module.exports = sha1

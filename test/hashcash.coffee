@@ -1,8 +1,8 @@
 should = require "should"
-HashCash = require("..").HashCash
+HashCash = require ".."
 
 describe "hashcash", ->
-  describe "genDate", ->
+  describe "date", ->
     it "should match today", ->
       now = new Date()
 
@@ -10,12 +10,12 @@ describe "hashcash", ->
       month = now.getMonth() + 1
       day   = now.getDate()
 
-      genDate = HashCash.genDate()
-      genDate.length.should.equal 6
+      date = HashCash.date()
+      date.length.should.equal 6
 
-      genYear  = parseInt genDate.substr(0, 2), 10
-      genMonth = parseInt genDate.substr(2, 2), 10
-      genDay   = parseInt genDate.substr(4, 2), 10
+      genYear  = parseInt date.substr(0, 2), 10
+      genMonth = parseInt date.substr(2, 2), 10
+      genDay   = parseInt date.substr(4, 2), 10
 
       genYear.should.be.within 0, 100
       genMonth.should.be.within 1, 12
@@ -29,7 +29,7 @@ describe "hashcash", ->
     parts =
       version: HashCash.VERSION = 1
       bits: 20
-      date: parseInt HashCash.genDate(), 10
+      date: parseInt HashCash.date(), 10
       rand: Math.random().toString(36).substr 2
       resource: "abcd"
       counter: 1
@@ -72,7 +72,7 @@ describe "hashcash", ->
 
     describe "success", ->
       it "should parse", ->
-        str = HashCash.buildString parts
+        str = HashCash.unparse parts
 
         data = HashCash.parse str
         should.exist data
@@ -86,19 +86,20 @@ describe "hashcash", ->
     parts =
       version: HashCash.VERSION
       bits: 16
-      date: HashCash.genDate()
+      date: HashCash.date()
       rand: Math.random().toString(36).substr 2
       resource: "abcd"
 
     describe "failure", ->
       it "should not validate", (done) ->
-        hc = new HashCash this, parts.bits, (challenge) ->
+        cb = (challenge) ->
           challenge[0].should.equal "#{HashCash.VERSION}"
           HashCash.VERSION.should.be.within 0, 8
           challenge = "#{HashCash.VERSION + 1}#{challenge.substr 1}"
           hc.validate(challenge).should.equal false
           done()
 
+        hc = new HashCash parts.bits, cb, this
         hc.validate()
           .should.equal false
 
@@ -108,14 +109,16 @@ describe "hashcash", ->
         hc.validate("", 0)
           .should.equal false
 
-        challenge = HashCash.buildString parts
+        challenge = HashCash.unparse parts
         hc.validate(challenge).should.equal false
 
         hc.generate parts.resource
 
     describe "success", ->
       it "should validate", (done) ->
-        hc = new HashCash this, parts.bits, (challenge) ->
+        cb = (challenge) ->
           hc.validate(challenge).should.equal true
           done()
+
+        hc = new HashCash parts.bits, cb, this
         hc.generate parts.resource

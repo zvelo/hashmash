@@ -58,7 +58,7 @@ module.exports = (grunt) ->
       hashcash:
         options:
           ignore: "os"
-          standalone: "hashcash"
+          standalone: "HashCash"
         src:  "lib/hashcash.js"
         dest: "tmp/hashcash.js"
 
@@ -116,7 +116,7 @@ module.exports = (grunt) ->
         tasks: [ "coffeelint:example", "coffee:example" ]
       min:
         files: [ "browser/*.js", "!browser/*.min.js" ]
-        tasks: "uglify"
+        tasks: [ "uglify", "test" ]
       test:
         files: "test/*.coffee"
         tasks: [ "coffeelint:test", "test" ]

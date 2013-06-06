@@ -1,9 +1,7 @@
 (function() {
-  var HashCash, Tester, WORKER_FILE, resource;
+  var Tester, WORKER_FILE, resource;
 
   resource = "zvelo.com";
-
-  HashCash = hashcash.HashCash;
 
   WORKER_FILE = "js/hashcash_worker.js";
 
@@ -53,6 +51,7 @@
     };
 
     Tester.prototype.start = function(reset) {
+      var e;
       if (!(resource.length && this._hc)) {
         return;
       }
@@ -69,7 +68,12 @@
       this._results.num += 1;
       this._results.total_num += 1;
       this._startTime = new Date();
-      return this._hc.generate(resource);
+      try {
+        return this._hc.generate(resource);
+      } catch (_error) {
+        e = _error;
+        return console.error("error", e, e.stack);
+      }
     };
 
     Tester.prototype.stop = function() {
@@ -90,6 +94,7 @@
     };
 
     Tester.prototype.reset = function() {
+      var workerFile;
       this.stop();
       this._numTests = $("#num-tests").val();
       this._numBits = $("#num-bits").val();
@@ -101,9 +106,8 @@
         $("#num-workers").removeAttr("disabled");
       }
       console.log("loaded numTests", this._numTests, "numBits", this._numBits, "noWorkers", this._noWorkers, "numWorkers", this._numWorkers);
-      this._hc = new HashCash(this, this._numBits, (function(hashcash) {
-        return this._hashCashCallback(hashcash);
-      }), this._noWorkers ? void 0 : WORKER_FILE, this._noWorkers ? void 0 : this._numWorkers);
+      workerFile = this._noWorkers ? void 0 : WORKER_FILE;
+      this._hc = new HashCash(this._numBits, this._hashCashCallback, this, workerFile, this._numWorkers);
       this._results = {
         num: 0,
         total_num: 0,

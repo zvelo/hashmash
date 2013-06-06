@@ -1,4 +1,4 @@
-HashCash = require("./hashcash").HashCash
+sha1 = require "./sha1"
 
 if self?
   self.console =
@@ -45,7 +45,7 @@ class Drone
     return unless @_data? and @_range?
 
     until @_data.result? or @_data.counter is @_range.end
-      HashCash.testSha @_data
+      sha1.tryChallenge @_data
 
     if @_data.result?
       @_sendResult()

@@ -1,4 +1,4 @@
-sha1 = require("..").HashCash
+sha1 = require ".."
 
 describe "sha1", ->
   describe "short", ->

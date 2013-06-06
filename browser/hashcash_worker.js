@@ -66,9 +66,9 @@ process.chdir = function (dir) {
 
 },{}],2:[function(require,module,exports){
 (function(process){(function() {
-  var Drone, HashCash, drone;
+  var Drone, drone, sha1;
 
-  HashCash = require("./hashcash").HashCash;
+  sha1 = require("./sha1");
 
   if (typeof self !== "undefined" && self !== null) {
     self.console = {
@@ -145,7 +145,7 @@ process.chdir = function (dir) {
         return;
       }
       while (!((this._data.result != null) || this._data.counter === this._range.end)) {
-        HashCash.testSha(this._data);
+        sha1.tryChallenge(this._data);
       }
       if (this._data.result != null) {
         return this._sendResult();
@@ -177,336 +177,10 @@ process.chdir = function (dir) {
 }).call(this);
 
 })(require("__browserify_process"))
-},{"./hashcash":3,"__browserify_process":1}],3:[function(require,module,exports){
+},{"./sha1":3,"__browserify_process":1}],3:[function(require,module,exports){
 (function() {
-  var HashCash, NodeTaskMaster, TimeoutTaskMaster, WebTaskMaster, buildDate, nextPos, numLeading0s, sha1, taskmaster;
-
-  sha1 = require("./sha1");
-
-  taskmaster = require("./taskmaster");
-
-  NodeTaskMaster = taskmaster.NodeTaskMaster;
-
-  WebTaskMaster = taskmaster.WebTaskMaster;
-
-  TimeoutTaskMaster = taskmaster.TimeoutTaskMaster;
-
-  numLeading0s = function(hex_str) {
-    var curNum, num, pos, _i, _ref;
-    num = 0;
-    for (pos = _i = 0, _ref = hex_str.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; pos = 0 <= _ref ? ++_i : --_i) {
-      curNum = parseInt(hex_str[pos], 16);
-      if (isNaN(curNum)) {
-        break;
-      }
-      switch (curNum) {
-        case 0x0:
-          num += 4;
-          break;
-        case 0x1:
-          return num + 3;
-        case 0x2:
-        case 0x3:
-          return num + 2;
-        case 0x4:
-        case 0x5:
-        case 0x6:
-        case 0x7:
-          return num + 1;
-        default:
-          return num;
-      }
-    }
-    return num;
-  };
-
-  buildDate = function(date) {
-    if (typeof date === "string") {
-      if (date.length !== 6) {
-        return null;
-      }
-      return date;
-    }
-    if (typeof date !== "number") {
-      return null;
-    }
-    return buildDate("" + date);
-  };
-
-  nextPos = function(str, pos) {
-    pos.start = pos.end + 1;
-    if (pos.start === str.length) {
-      return false;
-    }
-    pos.end = str.indexOf(':', pos.start);
-    if (pos.end === -1) {
-      return false;
-    }
-    if (pos.end === pos.start) {
-      return false;
-    }
-    return true;
-  };
-
-  HashCash = (function() {
-    HashCash.VERSION = 1;
-
-    HashCash.MIN_BITS = 16;
-
-    HashCash.hash = sha1.hash;
-
-    HashCash.genDate = function() {
-      var dd, mm, now, yy;
-      now = new Date();
-      yy = ("0" + (now.getYear() - 100)).slice(-2);
-      mm = ('0' + (now.getMonth() + 1)).slice(-2);
-      dd = ('0' + now.getDate()).slice(-2);
-      return "" + yy + mm + dd;
-    };
-
-    HashCash.buildString = function(parts) {
-      var date, ret;
-      ret = "";
-      if (parts.version == null) {
-        return ret;
-      }
-      ret += "" + parts.version + ":";
-      if (parts.bits == null) {
-        return ret;
-      }
-      ret += "" + parts.bits + ":";
-      if (parts.date == null) {
-        return ret;
-      }
-      date = buildDate(parts.date);
-      if (date == null) {
-        return ret;
-      }
-      ret += "" + date + ":";
-      if (parts.resource == null) {
-        return ret;
-      }
-      ret += "" + parts.resource + ":";
-      if (parts.rand == null) {
-        return ret;
-      }
-      ret += parts.rand;
-      if (parts.counter == null) {
-        return ret;
-      }
-      return ret += ":" + parts.counter;
-    };
-
-    HashCash.testSha = function(data) {
-      var sha, test;
-      test = "" + data.challenge + ":" + data.counter;
-      sha = sha1.hash(test);
-      if (numLeading0s(sha) >= data.bits) {
-        data.result = test;
-      } else {
-        data.counter += 1;
-      }
-      return void 0;
-    };
-
-    HashCash.parse = function(str) {
-      var counterEnd, data, pos;
-      if (str == null) {
-        return null;
-      }
-      data = {};
-      pos = {
-        start: 0,
-        end: -1,
-        length: function() {
-          return this.end - this.start;
-        }
-      };
-      if (!nextPos(str, pos)) {
-        return null;
-      }
-      data.version = parseInt(str.substr(pos.start, pos.length()), 10);
-      if (isNaN(data.version)) {
-        return null;
-      }
-      if (!nextPos(str, pos)) {
-        return null;
-      }
-      data.bits = parseInt(str.substr(pos.start, pos.length()), 10);
-      if (isNaN(data.bits)) {
-        return null;
-      }
-      if (!nextPos(str, pos)) {
-        return null;
-      }
-      data.date = parseInt(str.substr(pos.start, pos.length()), 10);
-      if (isNaN(data.date)) {
-        return null;
-      }
-      if (!nextPos(str, pos)) {
-        return null;
-      }
-      data.resource = str.substr(pos.start, pos.length());
-      if (!data.resource.length) {
-        return null;
-      }
-      if (!nextPos(str, pos)) {
-        return null;
-      }
-      data.rand = str.substr(pos.start, pos.length());
-      if (!data.rand.length) {
-        return null;
-      }
-      nextPos(str, pos);
-      counterEnd = (pos.end === -1 ? str.length : pos.end) - pos.start;
-      data.counter = parseInt(str.substr(pos.start, counterEnd), 10);
-      if (isNaN(data.counter)) {
-        return null;
-      }
-      return data;
-    };
-
-    function HashCash(_caller, _bits, _callback, _workerFile, _numWorkers) {
-      this._caller = _caller;
-      this._bits = _bits;
-      this._callback = _callback;
-      this._workerFile = _workerFile;
-      this._numWorkers = _numWorkers;
-      if (this._bits < HashCash.MIN_BITS) {
-        this._bits = HashCash.MIN_BITS;
-      }
-      this._workers = [];
-    }
-
-    HashCash.prototype._resetRange = function() {
-      return this.range = {
-        begin: 0,
-        end: -1
-      };
-    };
-
-    HashCash.prototype._workerCallback = function(result) {
-      this.stop();
-      return this._callback.call(this._caller, result);
-    };
-
-    HashCash.prototype._workerGenerator = function(type) {
-      var num, numWorkers;
-      if (this._workers.length) {
-        return;
-      }
-      if (this._numWorkers != null) {
-        numWorkers = Math.min(this._numWorkers, type.MAX_NUM_WORKERS);
-      } else {
-        numWorkers = type.DEFAULT_NUM_WORKERS;
-      }
-      console.log("using " + numWorkers + " workers");
-      return this._workers = (function() {
-        var _i, _results;
-        _results = [];
-        for (num = _i = 1; 1 <= numWorkers ? _i <= numWorkers : _i >= numWorkers; num = 1 <= numWorkers ? ++_i : --_i) {
-          _results.push(new type(this, this._workerCallback, this.range, this._workerFile));
-        }
-        return _results;
-      }).call(this);
-    };
-
-    HashCash.prototype._sendData = function(data) {
-      var worker, _i, _len, _ref, _results;
-      _ref = this._workers;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        worker = _ref[_i];
-        _results.push(worker.sendData(data));
-      }
-      return _results;
-    };
-
-    HashCash.prototype.stop = function() {
-      var worker, _i, _len, _ref, _results;
-      _ref = this._workers;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        worker = _ref[_i];
-        _results.push(worker.stop());
-      }
-      return _results;
-    };
-
-    HashCash.prototype.generate = function(resource, callback) {
-      var data, parts, type;
-      this._resetRange();
-      parts = {
-        version: HashCash.VERSION,
-        bits: this._bits,
-        date: HashCash.genDate(),
-        resource: resource,
-        rand: Math.random().toString(36).substr(2)
-      };
-      data = {
-        challenge: HashCash.buildString(parts),
-        counter: 0,
-        bits: parts.bits
-      };
-      /*
-      Use different strategies to ensure the main javascript thread is not
-      hung up while generating the HashCash
-      
-      1. Under Node, we use child_process
-      2. In browsers that support it, use web workers
-      3. In other browsers, use setTimeout
-      */
-
-      if (typeof window === "undefined" || window === null) {
-        type = NodeTaskMaster;
-      } else if ((typeof Worker !== "undefined" && Worker !== null) && (this._workerFile != null)) {
-        type = WebTaskMaster;
-      } else {
-        type = TimeoutTaskMaster;
-      }
-      this._workerGenerator(type);
-      return this._sendData(data);
-    };
-
-    HashCash.prototype.validate = function(str) {
-      var data, now;
-      if (str == null) {
-        return false;
-      }
-      if (this._bits == null) {
-        return false;
-      }
-      data = HashCash.parse(str);
-      if (data == null) {
-        return false;
-      }
-      if (data.bits < this._bits) {
-        return false;
-      }
-      if (data.bits < HashCash.MIN_BITS) {
-        return false;
-      }
-      if (data.version !== HashCash.VERSION) {
-        return false;
-      }
-      now = HashCash.genDate();
-      if (data.date < now - 1 || data.date > now + 1) {
-        return false;
-      }
-      return numLeading0s(sha1.hash(str)) >= data.bits;
-    };
-
-    return HashCash;
-
-  })();
-
-  exports.HashCash = HashCash;
-
-}).call(this);
-
-},{"./sha1":4,"./taskmaster":5}],4:[function(require,module,exports){
-(function() {
-  var ROTL, f, toHexStr;
+  var ROTL, f, hidden, key, sha1, toHexStr, _leading0s, _sha1hash, _tryChallenge,
+    __hasProp = {}.hasOwnProperty;
 
   ROTL = function(x, n) {
     return (x << n) | (x >>> (32 - n));
@@ -535,7 +209,7 @@ process.chdir = function (dir) {
     }
   };
 
-  exports.hash = function(msg) {
+  _sha1hash = function(msg) {
     var H0, H1, H2, H3, H4, K, M, N, T, TWO_TO_THIRTY_TWO, W, a, b, c, d, e, i, j, l, s, t, _i, _j, _k, _l, _m, _n, _ref, _ref1;
     K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
     msg += String.fromCharCode(0x80);
@@ -588,225 +262,73 @@ process.chdir = function (dir) {
     return toHexStr(H0) + toHexStr(H1) + toHexStr(H2) + toHexStr(H3) + toHexStr(H4);
   };
 
-}).call(this);
-
-},{}],6:[function(require,module,exports){
-
-},{}],7:[function(require,module,exports){
-exports.spawn = function () {};
-exports.exec = function () {};
-
-},{}],5:[function(require,module,exports){
-(function(__dirname){(function() {
-  var NodeTaskMaster, TaskMaster, TimeoutTaskMaster, WebTaskMaster, childProcess, hashcash, os,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  os = require("os");
-
-  childProcess = require("child_process");
-
-  hashcash = require("./hashcash");
-
-  TaskMaster = (function() {
-    TaskMaster.RANGE_INCREMENT = Math.pow(2, 15);
-
-    function TaskMaster(_caller, _callback, _range) {
-      this._caller = _caller;
-      this._callback = _callback;
-      this._range = _range;
+  _leading0s = function(hexStr) {
+    var curNum, num, pos, _i, _ref;
+    num = 0;
+    for (pos = _i = 0, _ref = hexStr.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; pos = 0 <= _ref ? ++_i : --_i) {
+      curNum = parseInt(hexStr[pos], 16);
+      if (isNaN(curNum)) {
+        break;
+      }
+      switch (curNum) {
+        case 0x0:
+          num += 4;
+          break;
+        case 0x1:
+          return num + 3;
+        case 0x2:
+        case 0x3:
+          return num + 2;
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7:
+          return num + 1;
+        default:
+          return num;
+      }
     }
+    return num;
+  };
 
-    TaskMaster.prototype._send = function(data) {
-      this._spawn();
-      if (this.sendFn == null) {
-        return;
-      }
-      return this.sendFn(data);
-    };
-
-    TaskMaster.prototype._spawn = function() {
-      if (this.worker != null) {
-        return;
-      }
-      return this.connect();
-    };
-
-    TaskMaster.prototype.sendData = function(data) {
-      return this._send({
-        m: "data",
-        data: data
-      });
-    };
-
-    TaskMaster.prototype._nextRange = function() {
-      this._range.begin = this._range.end + 1;
-      this._range.end = this._range.begin + TaskMaster.RANGE_INCREMENT - 1;
-      return this._range;
-    };
-
-    TaskMaster.prototype._sendRange = function() {
-      var range;
-      range = this._nextRange();
-      return this._send({
-        m: "range",
-        range: range
-      });
-    };
-
-    TaskMaster.prototype._gotResult = function(result) {
-      if (result == null) {
-        return;
-      }
-      return this._callback.call(this._caller, result);
-    };
-
-    TaskMaster.prototype._gotMessage = function(msg) {
-      if ((msg != null ? msg.m : void 0) == null) {
-        return;
-      }
-      switch (msg.m) {
-        case "request_range":
-          return this._sendRange();
-        case "result":
-          return this._gotResult(msg.result);
-        case "console_log":
-          return console.log("worker", msg.data);
-      }
-    };
-
-    TaskMaster.prototype.stop = function() {
-      if (this.worker == null) {
-        return;
-      }
-      this.disconnect();
-      delete this.worker;
-      return delete this.sendFn;
-    };
-
-    return TaskMaster;
-
-  })();
-
-  NodeTaskMaster = (function(_super) {
-    __extends(NodeTaskMaster, _super);
-
-    NodeTaskMaster.MAX_NUM_WORKERS = os.cpus != null ? os.cpus().length : 4;
-
-    NodeTaskMaster.DEFAULT_NUM_WORKERS = NodeTaskMaster.MAX_NUM_WORKERS;
-
-    function NodeTaskMaster(caller, callback, range) {
-      NodeTaskMaster.__super__.constructor.call(this, caller, callback, range);
+  _tryChallenge = function(data) {
+    var challenge, sha;
+    challenge = "" + data.challenge + ":" + data.counter;
+    sha = _sha1hash(challenge);
+    if (_leading0s(sha) >= data.bits) {
+      data.result = challenge;
+      return true;
     }
+    data.counter += 1;
+    return false;
+  };
 
-    NodeTaskMaster.prototype.connect = function() {
-      var me;
-      this.worker = childProcess.fork(__dirname + "/worker.js");
-      me = this;
-      this.worker.on("message", function(data) {
-        return me._gotMessage.call(me, data);
-      });
-      return this.sendFn = function(data) {
-        return this.worker.send(data);
-      };
-    };
+  sha1 = function(msg) {
+    return _sha1hash(msg);
+  };
 
-    NodeTaskMaster.prototype.disconnect = function() {
-      return this.worker.disconnect();
-    };
+  sha1.leading0s = function(hexStr) {
+    return _leading0s(hexStr);
+  };
 
-    return NodeTaskMaster;
+  sha1.tryChallenge = function(data) {
+    return _tryChallenge(data);
+  };
 
-  })(TaskMaster);
+  hidden = {
+    writable: false,
+    enumerable: false,
+    configurable: false
+  };
 
-  WebTaskMaster = (function(_super) {
-    __extends(WebTaskMaster, _super);
+  for (key in sha1) {
+    if (!__hasProp.call(sha1, key)) continue;
+    Object.defineProperty(sha1, key, hidden);
+  }
 
-    WebTaskMaster.MAX_NUM_WORKERS = 8;
-
-    WebTaskMaster.DEFAULT_NUM_WORKERS = 4;
-
-    function WebTaskMaster(caller, callback, range, file) {
-      this.file = file;
-      WebTaskMaster.__super__.constructor.call(this, caller, callback, range);
-    }
-
-    WebTaskMaster.prototype.connect = function() {
-      var me;
-      this.worker = new Worker(this.file);
-      me = this;
-      this.worker.onmessage = function(event) {
-        return me._gotMessage.call(me, event.data);
-      };
-      return this.sendFn = function(data) {
-        return this.worker.postMessage(data);
-      };
-    };
-
-    WebTaskMaster.prototype.disconnect = function() {
-      return this.worker.terminate();
-    };
-
-    return WebTaskMaster;
-
-  })(TaskMaster);
-
-  TimeoutTaskMaster = (function() {
-    TimeoutTaskMaster.MAX_RUNTIME = 99;
-
-    TimeoutTaskMaster.YIELD_TIME = 1;
-
-    TimeoutTaskMaster.MAX_NUM_WORKERS = 1;
-
-    TimeoutTaskMaster.DEFAULT_NUM_WORKERS = 1;
-
-    function TimeoutTaskMaster(_caller, _callback) {
-      this._caller = _caller;
-      this._callback = _callback;
-    }
-
-    TimeoutTaskMaster.prototype.sendData = function(_data) {
-      this._data = _data;
-      delete this._stopFlag;
-      return this.start();
-    };
-
-    TimeoutTaskMaster.prototype.start = function() {
-      var me, startTime;
-      startTime = new Date();
-      while (!((this._stopFlag != null) || (this._data.result != null) || (new Date() - startTime >= TimeoutTaskMaster.MAX_RUNTIME))) {
-        hashcash.HashCash.testSha(this._data);
-      }
-      if (this._stopFlag != null) {
-
-      } else if (this._data.result != null) {
-        return this._callback.call(this._caller, this._data.result);
-      } else {
-        me = this;
-        return setTimeout((function() {
-          return me.start.call(me);
-        }), TimeoutTaskMaster.YIELD_TIME);
-      }
-    };
-
-    TimeoutTaskMaster.prototype.stop = function() {
-      return this._stopFlag = true;
-    };
-
-    return TimeoutTaskMaster;
-
-  })();
-
-  exports.TaskMaster = TaskMaster;
-
-  exports.NodeTaskMaster = NodeTaskMaster;
-
-  exports.WebTaskMaster = WebTaskMaster;
-
-  exports.TimeoutTaskMaster = TimeoutTaskMaster;
+  module.exports = sha1;
 
 }).call(this);
 
-})("/")
-},{"os":6,"child_process":7,"./hashcash":3}]},{},[2])
+},{}]},{},[2])
 ;

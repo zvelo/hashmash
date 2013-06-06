@@ -1,5 +1,4 @@
 resource = "zvelo.com"
-HashCash = hashcash.HashCash
 
 WORKER_FILE = "js/hashcash_worker.js"
 
@@ -61,7 +60,10 @@ class Tester
 
     @_startTime = new Date()
 
-    @_hc.generate resource
+    try
+      @_hc.generate resource
+    catch e
+      console.error "error", e, e.stack
 
   stop: ->
     return unless @_hc? and @status is Tester.STATUS_RUNNING
@@ -103,10 +105,13 @@ class Tester
                 "noWorkers", @_noWorkers,
                 "numWorkers", @_numWorkers
 
-    @_hc = new HashCash this, @_numBits,
-      ((hashcash)-> @_hashCashCallback hashcash),
-      if @_noWorkers then undefined else WORKER_FILE,
-      if @_noWorkers then undefined else @_numWorkers
+    workerFile = if @_noWorkers then undefined else WORKER_FILE
+
+    @_hc = new HashCash @_numBits,
+      @_hashCashCallback,
+      this,
+      workerFile,
+      @_numWorkers
 
     @_results =
       num: 0
