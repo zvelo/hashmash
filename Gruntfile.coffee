@@ -4,26 +4,35 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON "package.json"
 
     clean:
-      lib: "lib/*.js"
       browser: "browser/*.js"
-      tmp: "tmp/"
+      tmp: "tmp"
 
     coffee:
-      lib:
-        expand: true
-        flatten: true
-        cwd: "src"
-        src: "*.coffee"
-        dest: "lib"
-        ext: ".js"
+      options:
+        sourceMap: true
 
       example:
         expand: true
         flatten: true
-        cwd: "example/src"
+        cwd: "example/lib"
         src: "*.coffee"
         dest: "example/public/js"
         ext: ".js"
+
+     coffeeify:
+      hashcash:
+        options:
+          ignore: "os"
+          debug: true
+        src:  "lib/browser.coffee"
+        dest: "tmp/hashcash.js"
+
+      hashcash_worker:
+        options:
+          ignore: "os"
+          debug: true
+        src:  "lib/worker.coffee"
+        dest: "tmp/hashcash_worker.js"
 
     coffeelint:
       options:
@@ -49,24 +58,10 @@ module.exports = (grunt) ->
         no_stand_alone_at: level: "warn"
         arrow_spacing: level: "warn"
         coffeescript_error: level: "error"
-      src: "src/*.coffee"
+      lib: "lib/*.coffee"
       test: "test/*.coffee"
-      example: [ "example/*.coffee", "example/src/*.coffee" ]
+      example: [ "example/*.coffee", "example/lib/*.coffee" ]
       root: "*.coffee"
-
-    browserify:
-      hashcash:
-        options:
-          ignore: "os"
-          standalone: "HashCash"
-        src:  "lib/hashcash.js"
-        dest: "tmp/hashcash.js"
-
-      hashcash_worker:
-        options:
-          ignore: "os"
-        src:  "lib/worker.js"
-        dest: "tmp/hashcash_worker.js"
 
     concat:
       copyright:
@@ -105,14 +100,16 @@ module.exports = (grunt) ->
       src: "test/*.coffee"
 
     watch:
-      src:
-        files: "src/*.coffee"
-        tasks: [ "coffeelint:src", "coffee:lib" ]
-      browser:
-        files: "lib/*.js"
-        tasks: [ "browserify", "concat:copyright", "clean:tmp" ]
+      lib:
+        files: "lib/*.coffee"
+        tasks: [
+          "coffeelint:lib",
+          "coffeeify",
+          "concat:copyright",
+          "clean:tmp"
+        ]
       example:
-        files: [ "example/*.coffee", "example/src/*.coffee" ]
+        files: [ "example/*.coffee", "example/lib/*.coffee" ]
         tasks: [ "coffeelint:example", "coffee:example" ]
       min:
         files: [ "browser/*.js", "!browser/*.min.js" ]
@@ -124,7 +121,7 @@ module.exports = (grunt) ->
         files: "*.coffee"
         tasks: "coffeelint:root"
 
-  grunt.loadNpmTasks "grunt-browserify"
+  grunt.loadNpmTasks "grunt-coffeeify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
   grunt.loadNpmTasks "grunt-coffeelint"
   grunt.loadNpmTasks "grunt-contrib-clean"
@@ -145,7 +142,7 @@ module.exports = (grunt) ->
     "clean"
     "lint"
     "coffee"
-    "browserify"
+    "coffeeify"
     "concat"
     "uglify"
     "clean:tmp"
