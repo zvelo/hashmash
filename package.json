@@ -20,8 +20,9 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "chai": "1.x.x",
     "jade": "0.x.x",
-    "should": "1.x.x",
+    "karma": "0.x.x",
     "tiny-lr": "0.x.x",
     "express": "3.x.x",
     "grunt": "0.x.x",

@@ -8,6 +8,7 @@ module.exports = (grunt) ->
       browser: "browser/*.js"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
       tmp: "tmp"
+      karma: "test/browser/tmp"
 
     coffee:
       options:
@@ -29,6 +30,14 @@ module.exports = (grunt) ->
         dest: "example/public/js"
         ext: ".js"
 
+      karma:
+        expand: true
+        flatten: true
+        cwd: "test/"
+        src: "*.coffee"
+        dest: "test/browser/tmp"
+        ext: ".js"
+
     browserify:
       browser:
         options:
@@ -43,6 +52,16 @@ module.exports = (grunt) ->
           debug: true
         src:  "lib/worker.js"
         dest: "tmp/hashcash_worker.js"
+
+      karma:
+        options:
+          debug: true
+        expand: true
+        flatten: true
+        cwd: "test/browser/tmp"
+        src: "*.js"
+        dest: "test/browser"
+        ext: ".js"
 
     coffeelint:
       options:
@@ -105,8 +124,6 @@ module.exports = (grunt) ->
       options:
         reporter: "list"
         colors: false
-        require: "should"
-        timeout: 5000
       src: "test/*.coffee"
 
     watch:
@@ -118,7 +135,7 @@ module.exports = (grunt) ->
         tasks: [ "coffeelint:example", "build:example" ]
       test:
         files: "test/*.coffee"
-        tasks: [ "coffeelint:test", "test" ]
+        tasks: [ "build:karma", "coffeelint:test", "test" ]
       root:
         files: "*.coffee"
         tasks: "coffeelint:root"
@@ -127,9 +144,17 @@ module.exports = (grunt) ->
       node:
         tasks: "coffee:src"
       browser:
-        tasks: [ "browserify", "concat:copyright", "clean:tmp", "minimize" ]
+        tasks: [
+          "browserify:browser",
+          "browserify:browser_worker",
+          "concat:copyright",
+          "clean:tmp",
+          "minimize"
+        ]
       example:
         tasks: "coffee:example"
+      karma:
+        tasks: [ "coffee:karma", "browserify:karma", "clean:karma" ]
 
   grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
@@ -158,4 +183,5 @@ module.exports = (grunt) ->
     "clean"
     "coffeelint"
     "build"
+    "test"
   ]

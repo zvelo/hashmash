@@ -1,4 +1,5 @@
-sha1 = require ".."
+should = require("chai").should()
+sha1   = require ".."
 
 describe "sha1", ->
   describe "short", ->

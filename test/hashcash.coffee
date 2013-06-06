@@ -1,4 +1,4 @@
-should = require "should"
+should = require("chai").should()
 HashCash = require ".."
 
 describe "hashcash", ->
@@ -92,6 +92,8 @@ describe "hashcash", ->
 
     describe "failure", ->
       it "should not validate", (done) ->
+        @timeout(105000)
+
         cb = (challenge) ->
           challenge[0].should.equal "#{HashCash.VERSION}"
           HashCash.VERSION.should.be.within 0, 8
@@ -116,6 +118,8 @@ describe "hashcash", ->
 
     describe "success", ->
       it "should validate", (done) ->
+        @timeout(10000)
+
         cb = (challenge) ->
           hc.validate(challenge).should.equal true
           done()
