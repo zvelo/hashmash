@@ -140,3 +140,7 @@
   window.tester = new Tester;
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=example.js.map
+*/
