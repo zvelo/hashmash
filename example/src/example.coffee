@@ -108,10 +108,10 @@ class Tester
     workerFile = if @_noWorkers then undefined else WORKER_FILE
 
     @_hc = new HashCash @_numBits,
-      @_hashCashCallback,
-      this,
-      workerFile,
-      @_numWorkers
+                        @_hashCashCallback,
+                        this,
+                        workerFile,
+                        @_numWorkers
 
     @_results =
       num: 0

@@ -10,7 +10,8 @@ basePath = "..";
 files = [
   MOCHA,
   MOCHA_ADAPTER,
-  "test/browser/*.js"
+  "test/browser/*.js",
+  { pattern: "browser/*.js", included: false },
 ];
 
 
@@ -20,7 +21,7 @@ exclude = [];
 
 // test results reporter to use
 // possible values: "dots", "progress", "junit"
-reporters = [ "dots" ];
+reporters = [ "progress" ];
 
 
 // web server port

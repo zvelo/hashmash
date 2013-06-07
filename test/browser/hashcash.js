@@ -117,10 +117,10 @@
 /*
 //@ sourceMappingURL=hashcash.js.map
 */
-},{"..":2,"chai":3}],3:[function(require,module,exports){
+},{"chai":2,"..":3}],2:[function(require,module,exports){
 module.exports = require('./lib/chai');
 
-},{"./lib/chai":4}],2:[function(require,module,exports){
+},{"./lib/chai":4}],3:[function(require,module,exports){
 (function() {
   "use strict";
   var HashCash, NodeTaskMaster, TimeoutTaskMaster, WebTaskMaster, properties, sha1, _buildDate, _nextPos, _ref;

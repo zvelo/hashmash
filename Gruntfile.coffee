@@ -128,7 +128,7 @@ module.exports = (grunt) ->
       options:
         reporter: "list"
         colors: false
-      src: "test/*.coffee"
+      src: [ "test/*.coffee", "!test/browser_*.coffee" ]
 
     karma:
       options:
@@ -149,8 +149,11 @@ module.exports = (grunt) ->
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
       test:
-        files: "test/*.coffee"
+        files: [ "test/*.coffee", "!test/browser_*.coffee" ]
         tasks: [ "build:karma", "coffeelint:test", "watchTest" ]
+      browserTest:
+        files: [ "test/browser_*.coffee" ]
+        tasks: [ "build:karma", "coffeelint:test", "karma:browser:run" ]
       root:
         files: "*.coffee"
         tasks: "coffeelint:root"
