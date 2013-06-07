@@ -22,10 +22,10 @@
   "devDependencies": {
     "chai": "1.x.x",
     "jade": "0.x.x",
-    "karma": "0.x.x",
     "tiny-lr": "0.x.x",
     "express": "3.x.x",
     "grunt": "0.x.x",
+    "grunt-karma": "0.x.x",
     "grunt-browserify": "1.x.x",
     "grunt-cafe-mocha": "0.x.x",
     "grunt-coffeelint": "0.x.x",

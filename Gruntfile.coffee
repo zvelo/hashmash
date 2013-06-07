@@ -126,6 +126,11 @@ module.exports = (grunt) ->
         colors: false
       src: "test/*.coffee"
 
+    karma:
+      browser:
+        configFile: "test/karma.conf.js"
+        background: true
+
     watch:
       src:
         files: "src/*.coffee"
@@ -156,6 +161,7 @@ module.exports = (grunt) ->
       karma:
         tasks: [ "coffee:karma", "browserify:karma", "clean:karma" ]
 
+  grunt.loadNpmTasks "grunt-karma"
   grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
   grunt.loadNpmTasks "grunt-coffeelint"
@@ -165,8 +171,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-uglify"
 
-  grunt.registerTask     "test", [  "cafemocha" ]
-  grunt.registerTask "minimize", [     "uglify" ]
+  grunt.registerTask     "test", [ "karma:browser:run", "cafemocha" ]
+  grunt.registerTask "minimize", [ "uglify" ]
 
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
