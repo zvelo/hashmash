@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "copyright.js",
+  "sourceRoot": "../src/",
+  "sources": [
+    "copyright.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;;;;;;;;;;;;;;;CAAA;CAAA;CAAA;CAAA;CAAA"
+}

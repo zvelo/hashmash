@@ -11,7 +11,6 @@ module.exports = (grunt) ->
       lib: [ "lib/*.js", "lib/*.map" ]
       browser: "browser/*.js"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      tmp: "tmp"
       karma: "test/browser/tmp"
 
     coffee:
@@ -42,30 +41,47 @@ module.exports = (grunt) ->
         dest: "test/browser/tmp"
         ext: ".js"
 
-    browserify:
+    requirejs:
+      options:
+        baseUrl: "lib"
+        name: "almond"
+        generateSourceMaps: true
+        preserveLicenseComments: false
+        paths:
+          almond: "../node_modules/almond/almond"
+        optimize: "uglify2"
+        wrap: true
+        uglify2:
+          output:
+            comments: (node, comment) ->
+              text = comment.value
+              type = comment.type
+              if type is "comment2"
+                ## multiline comment
+                return /@preserve|@license|@cc_on/i.test text
+
       browser:
         options:
-          ignore: "os"
-          debug: true
-        src:  "lib/browser.js"
-        dest: "tmp/hashcash.js"
+          include: [ "hashcash" ]
+          out: "browser/hashcash.min.js"
+          wrap:
+            startFile: "lib/hashcash.start.frag"
+            endFile: "lib/hashcash.end.frag"
 
       browser_worker:
         options:
-          ignore: "os"
-          debug: true
-        src:  "lib/worker.js"
-        dest: "tmp/hashcash_worker.js"
+          include: [ "worker" ]
+          insertRequire: [ "worker" ]
+          out: "browser/hashcash_worker.min.js"
 
-      karma:
-        options:
-          debug: true
-        expand: true
-        flatten: true
-        cwd: "test/browser/tmp"
-        src: "*.js"
-        dest: "test/browser"
-        ext: ".js"
+      #karma:
+      #  options:
+      #    expand: true
+      #    flatten: true
+      #    cwd: "test/browser/tmp"
+      #    src: "*.js"
+      #    dest: "test/browser"
+      #    ext: ".js"
 
     coffeelint:
       options:
@@ -95,34 +111,6 @@ module.exports = (grunt) ->
       test: "test/*.coffee"
       example: [ "example/*.coffee", "example/src/*.coffee" ]
       root: "*.coffee"
-
-    concat:
-      copyright:
-        nonull: true
-        files:
-          "browser/hashcash.js": [
-            "copyright.js",
-            "tmp/hashcash.js"
-          ]
-
-          "browser/hashcash_worker.js": [
-            "copyright.js",
-            "tmp/hashcash_worker.js"
-          ]
-
-    uglify:
-      options:
-        preserveComments: "some"
-        banner:
-          "/*! <%= pkg.name %> <%= grunt.template.today(\"yyyy-mm-dd\") %> */\n"
-
-      browser:
-        expand: true
-        flatten: true
-        cwd: "browser"
-        src: [ "*.js", "!*.min.js" ]
-        dest: "browser"
-        ext: ".min.js"
 
     cafemocha:
       options:
@@ -163,29 +151,26 @@ module.exports = (grunt) ->
         tasks: "coffee:src"
       browser:
         tasks: [
-          "browserify:browser",
-          "browserify:browser_worker",
-          "concat:copyright",
-          "clean:tmp",
-          "minimize"
+          "requirejs:browser"
+          "requirejs:browser_worker"
         ]
       example:
         tasks: "coffee:example"
       karma:
-        tasks: [ "coffee:karma", "browserify:karma", "clean:karma" ]
+        tasks: [
+          "coffee:karma"
+          #"requirejs:karma"
+          "clean:karma"
+        ]
 
   grunt.loadNpmTasks "grunt-env"
   grunt.loadNpmTasks "grunt-karma"
-  grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
   grunt.loadNpmTasks "grunt-coffeelint"
   grunt.loadNpmTasks "grunt-contrib-clean"
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-coffee"
-  grunt.loadNpmTasks "grunt-contrib-concat"
-  grunt.loadNpmTasks "grunt-contrib-uglify"
-
-  grunt.registerTask "minimize", [ "uglify" ]
+  grunt.loadNpmTasks "grunt-contrib-requirejs"
 
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks

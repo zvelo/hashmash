@@ -1,7 +1,7 @@
 "use strict"
 
 `if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
-define [ "./sha1", "./taskmaster" ], (sha1, taskmaster) ->
+define [ "./copyright", "./sha1", "./taskmaster" ], (cc, sha1, taskmaster) ->
   ## we use our own sha1 instead of crypto for a more lean browser
   ## implementation with requirejs
 

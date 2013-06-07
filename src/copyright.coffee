@@ -1,4 +1,5 @@
-/*
+###*
+ * @license
  * zvelo HashCash Javascript Library
  *
  * Copyright 2013 zvelo, Inc. All Rights Reserved
@@ -8,4 +9,9 @@
  * www.movable-type.co.uk
  *  - http://csrc.nist.gov/groups/ST/toolkit/secure_hashing.html
  *  - http://csrc.nist.gov/groups/ST/toolkit/examples.html
- */
+ *
+ * almond
+ * (c) 2011-2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/almond for details
+###

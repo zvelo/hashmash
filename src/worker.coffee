@@ -2,7 +2,7 @@
 
 `if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
 
-define [ "./sha1" ], (sha1) ->
+define [ "./copyright", "./sha1" ], (cc, sha1) ->
   class Drone
     @MAX_RUNTIME = 99
     @YIELD_TIME = 1
