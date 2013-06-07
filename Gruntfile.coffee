@@ -3,6 +3,10 @@ module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON "package.json"
 
+    env:
+      karma:
+        PHANTOMJS_BIN: "./node_modules/.bin/phantomjs"
+
     clean:
       lib: [ "lib/*.js", "lib/*.map" ]
       browser: "browser/*.js"
@@ -127,20 +131,26 @@ module.exports = (grunt) ->
       src: "test/*.coffee"
 
     karma:
-      browser:
+      options:
         configFile: "test/karma.conf.js"
+      browser:
         background: true
+      continuous:
+        singleRun: true
+        port: 9877
+        runnerPort: 9101
+        browsers: [ "PhantomJS" ]
 
-    watch:
+    reallyWatch:
       src:
         files: "src/*.coffee"
-        tasks: [ "coffeelint:src", "build:node", "build:browser", "test" ]
+        tasks: [ "coffeelint:src", "build:node", "build:browser", "watchTest" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
       test:
         files: "test/*.coffee"
-        tasks: [ "build:karma", "coffeelint:test", "test" ]
+        tasks: [ "build:karma", "coffeelint:test", "watchTest" ]
       root:
         files: "*.coffee"
         tasks: "coffeelint:root"
@@ -161,6 +171,7 @@ module.exports = (grunt) ->
       karma:
         tasks: [ "coffee:karma", "browserify:karma", "clean:karma" ]
 
+  grunt.loadNpmTasks "grunt-env"
   grunt.loadNpmTasks "grunt-karma"
   grunt.loadNpmTasks "grunt-browserify"
   grunt.loadNpmTasks "grunt-cafe-mocha"
@@ -171,19 +182,21 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-uglify"
 
-  grunt.registerTask     "test", [ "karma:browser:run", "cafemocha" ]
   grunt.registerTask "minimize", [ "uglify" ]
 
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
 
-  exampleServer = require "./example/server"
+  grunt.registerTask "test", [ "cafemocha", "env:karma", "karma:continuous" ]
 
   grunt.registerTask "example", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
-    port = process.env.PORT or 3000
-    exampleServer.listen port, ->
-      grunt.log.writeln "Example server listening on port #{port}"
+    require("./example/server").listen()
+
+  grunt.renameTask "watch", "reallyWatch"
+  grunt.registerTask "watch", [ "karma:browser", "reallyWatch" ]
+
+  grunt.registerTask "watchTest", [ "cafemocha", "karma:browser:run" ]
 
   grunt.registerTask "default", [
     "clean"
