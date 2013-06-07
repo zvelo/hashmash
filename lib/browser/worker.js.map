@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "worker.js",
+  "sourceRoot": "../../src/browser/",
+  "sources": [
+    "worker.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;CAAA,CAAA,UAAA;CAAA,CAEA,CAAsC,EAAA,CAAtC,GAAuC,CAAhC,GAAA;CACL,EAAY,CAAZ,CAAA,IAAmB;CAAc,GAAD,OAAJ,EAAA;CAAhB,IAAM;CACb,EAAY,CAAb,CAAa,IAAjB,EAAA;CAAkC,GAAN,CAAK,KAAL,GAAA;CAFQ,IAEnB;CAFnB,EAAsC;CAFtC"
+}

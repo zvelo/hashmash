@@ -1,6 +1,5 @@
 "use strict"
 
-`if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
 define [ "./sha1" ], (sha1) ->
   TIMEOUT_MAX_RUNTIME = 99
   TIMEOUT_YIELD_TIME  =  1
@@ -59,27 +58,7 @@ define [ "./sha1" ], (sha1) ->
       delete @worker
       delete @sendFn
 
-  if module?
-    ## this class can only be used in node, so don't worry about these requires
-    class NodeTaskMaster extends (TaskMaster)
-      os           = require "os"
-      childProcess = require "child_process"
-
-      @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
-      @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
-
-      constructor: (caller, cb, range) ->
-        super caller, cb, range
-
-      connect: ->
-        @worker = childProcess.fork __dirname + "/worker.js"
-        me = this
-        @worker.on "message", (data) -> me._gotMessage data
-        @sendFn = (data) -> @worker.send data
-
-      disconnect: -> @worker.disconnect()
-
-    exports.NodeTaskMaster = NodeTaskMaster
+  exports.TaskMaster = TaskMaster
 
   class WebTaskMaster extends (TaskMaster)
     @MAX_NUM_WORKERS     = 8

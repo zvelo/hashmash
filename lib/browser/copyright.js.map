@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "copyright.js",
-  "sourceRoot": "../src/",
+  "sourceRoot": "../../src/browser/",
   "sources": [
     "copyright.coffee"
   ],

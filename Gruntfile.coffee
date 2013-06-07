@@ -8,8 +8,6 @@ module.exports = (grunt) ->
         PHANTOMJS_BIN: "./node_modules/.bin/phantomjs"
 
     clean:
-      lib: [ "lib/*.js", "lib/*.map" ]
-      browser: "browser/*.js"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
       karma: "test/browser/tmp"
 
@@ -17,11 +15,10 @@ module.exports = (grunt) ->
       options:
         sourceMap: true
 
-      src:
+      main:
         expand: true
-        flatten: true
         cwd: "src"
-        src: "*.coffee"
+        src: [ "*.coffee", "**/*.coffee" ]
         dest: "lib"
         ext: ".js"
 
@@ -60,18 +57,18 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
-      browser:
+      hashcash:
         options:
-          include: [ "hashcash" ]
+          include: [ "browser/main" ]
           out: "browser/hashcash.min.js"
           wrap:
-            startFile: "lib/hashcash.start.frag"
-            endFile: "lib/hashcash.end.frag"
+            startFile: "hashcash.start.frag"
+            endFile: "hashcash.end.frag"
 
-      browser_worker:
+      hashcash_worker:
         options:
-          include: [ "worker" ]
-          insertRequire: [ "worker" ]
+          include: [ "browser/worker" ]
+          insertRequire: [ "browser/worker" ]
           out: "browser/hashcash_worker.min.js"
 
       #karma:
@@ -132,7 +129,7 @@ module.exports = (grunt) ->
     reallyWatch:
       src:
         files: "src/*.coffee"
-        tasks: [ "coffeelint:src", "build:node", "build:browser", "watchTest" ]
+        tasks: [ "coffeelint:src", "build:main", "watchTest" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
@@ -147,13 +144,8 @@ module.exports = (grunt) ->
         tasks: "coffeelint:root"
 
     build:
-      node:
-        tasks: "coffee:src"
-      browser:
-        tasks: [
-          "requirejs:browser"
-          "requirejs:browser_worker"
-        ]
+      main:
+        tasks: [ "coffee:main", "requirejs" ]
       example:
         tasks: "coffee:example"
       karma:

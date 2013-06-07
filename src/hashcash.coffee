@@ -1,11 +1,8 @@
 "use strict"
 
-`if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
-define [ "./copyright", "./sha1", "./taskmaster" ], (cc, sha1, taskmaster) ->
+define [ "./sha1" ], (sha1) ->
   ## we use our own sha1 instead of crypto for a more lean browser
   ## implementation with requirejs
-
-  { NodeTaskMaster, WebTaskMaster, TimeoutTaskMaster } = taskmaster
 
   _buildDate = (date) ->
     if typeof(date) is "string"
@@ -119,20 +116,15 @@ define [ "./copyright", "./sha1", "./taskmaster" ], (cc, sha1, taskmaster) ->
       3. In other browsers, use setTimeout
       ###
 
-      if not window?
-        ## running under node
-        type = NodeTaskMaster
-      else if Worker? and workerFile?
-        ## browser with web workers
-        type = WebTaskMaster
-      else
-        ## other browser
-        type = TimeoutTaskMaster
+      TaskMaster = HashCash.TaskMaster
+
+      if not workerFile? and HashCash.BackupTaskMaster?
+        TaskMaster = HashCash.BackupTaskMaster
 
       if numWorkers?
-        numWorkers = Math.min numWorkers, type.MAX_NUM_WORKERS
+        numWorkers = Math.min numWorkers, TaskMaster.MAX_NUM_WORKERS
       else
-        numWorkers = type.DEFAULT_NUM_WORKERS
+        numWorkers = TaskMaster.DEFAULT_NUM_WORKERS
 
       return unless numWorkers
 
@@ -148,7 +140,7 @@ define [ "./copyright", "./sha1", "./taskmaster" ], (cc, sha1, taskmaster) ->
 
       @_workers = (
         for num in [ 1 .. numWorkers ]
-          new type this, wrappedCb, @_range, workerFile
+          new TaskMaster this, wrappedCb, @_range, workerFile
       )
 
     ## PRIVATE

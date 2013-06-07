@@ -1,8 +1,6 @@
 "use strict"
 
-`if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
-
-define [ "./copyright", "./sha1" ], (cc, sha1) ->
+define [ "./sha1" ], (sha1) ->
   class Drone
     @MAX_RUNTIME = 99
     @YIELD_TIME = 1
@@ -47,11 +45,4 @@ define [ "./copyright", "./sha1" ], (cc, sha1) ->
       else
         @_requestRange()
 
-  if self?
-    ## running in a browser with web workers
-    drone = new Drone (data) -> self.postMessage data
-    self.onmessage = (event) -> drone.gotMessage event.data
-  else
-    ## running under node
-    drone = new Drone (data) -> process.send data
-    process.on "message", (data) -> drone.gotMessage data
+  return Drone
