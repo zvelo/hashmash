@@ -79,7 +79,7 @@ module.exports = (grunt) ->
         no_plusplus: level: "warn"
         no_throwing_strings: level: "error"
         cyclomatic_complexity: value: 10, level: "ignore"
-        no_backticks: level: "error"
+        no_backticks: level: "ignore"
         line_endings: level: "warn", value: "unix"
         no_implicit_parens: level: "ignore"
         empty_constructor_needs_parens: level: "ignore"

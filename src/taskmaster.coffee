@@ -1,111 +1,131 @@
 "use strict"
 
-os           = require "os"
-childProcess = require "child_process"
-sha1         = require "./sha1"
+`if(typeof define !== 'function'){var define = (require('amdefine'))(module);}`
+define [ "./sha1" ], (sha1) ->
+  TIMEOUT_MAX_RUNTIME = 99
+  TIMEOUT_YIELD_TIME  =  1
 
-TIMEOUT_MAX_RUNTIME = 99
-TIMEOUT_YIELD_TIME  =  1
+  exports = {}
 
-class TaskMaster
-  @RANGE_INCREMENT: Math.pow 2, 15
+  class TaskMaster
+    @RANGE_INCREMENT: Math.pow 2, 15
 
-  constructor: (@_caller, @_cb, @_range) ->
+    constructor: (@_caller, @_cb, @_range) ->
+      @_sendQueue = []
+      @_ready = false
 
-  _send: (data) ->
-    @_spawn()
-    return unless @sendFn?
-    @sendFn data
+    _send: (data) ->
+      @_spawn()
+      return unless @sendFn?
+      return @sendFn data if @_ready
+      @_sendQueue.push(data)
 
-  _spawn: ->
-    return if @worker?
-    @connect()
+    _setGo: ->
+      @_ready = true
+      @_send @_sendQueue.shift() while @_sendQueue.length
 
-  _incRange: ->
-    @_range.begin = @_range.end + 1
-    @_range.end = @_range.begin + TaskMaster.RANGE_INCREMENT - 1
+    _spawn: ->
+      return if @worker?
+      @connect()
 
-  _sendRange: ->
-    @_incRange()
-    @_send m: "range", range: @_range
+    _incRange: ->
+      @_range.begin = @_range.end + 1
+      @_range.end = @_range.begin + TaskMaster.RANGE_INCREMENT - 1
 
-  _gotResult: (result) ->
-    return unless result?
-    @_cb.call @_caller, result
+    _sendRange: ->
+      @_incRange()
+      @_send m: "range", range: @_range
 
-  _gotMessage: (msg) ->
-    return unless msg?.m?
+    _gotResult: (result) ->
+      return unless result?
+      @_cb.call @_caller, result
 
-    switch msg.m
-      when "request_range" then @_sendRange()
-      when "result" then @_gotResult msg.result
-      when "console_log" then console.log "worker", msg.data
+    _gotMessage: (msg) ->
+      return unless msg?.m?
 
-  sendData: (data) -> @_send m: "data", data: data
+      switch msg.m
+        when "ready" then @_setGo()
+        when "request_range" then @_sendRange()
+        when "result" then @_gotResult msg.result
+        when "console_log" then console.log "worker", msg.data
 
-  stop: ->
-    return unless @worker?
-    @disconnect()
-    delete @worker
-    delete @sendFn
+    sendData: (data) -> @_send m: "data", data: data
 
-class NodeTaskMaster extends (TaskMaster)
-  @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
-  @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
+    stop: ->
+      @_ready = false
+      @_sendQueue.length = 0
+      return unless @worker?
+      @disconnect()
+      delete @worker
+      delete @sendFn
 
-  constructor: (caller, cb, range) ->
-    super caller, cb, range
+  if module?
+    ## this class can only be used in node, so don't worry about these requires
+    class NodeTaskMaster extends (TaskMaster)
+      os           = require "os"
+      childProcess = require "child_process"
 
-  connect: ->
-    @worker = childProcess.fork __dirname + "/worker.js"
-    me = this
-    @worker.on "message", (data) -> me._gotMessage data
-    @sendFn = (data) -> @worker.send data
+      @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
+      @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
 
-  disconnect: -> @worker.disconnect()
+      constructor: (caller, cb, range) ->
+        super caller, cb, range
 
-class WebTaskMaster extends (TaskMaster)
-  @MAX_NUM_WORKERS     = 8
-  @DEFAULT_NUM_WORKERS = 4
+      connect: ->
+        @worker = childProcess.fork __dirname + "/worker.js"
+        me = this
+        @worker.on "message", (data) -> me._gotMessage data
+        @sendFn = (data) -> @worker.send data
 
-  constructor: (caller, cb, range, @file) ->
-    super caller, cb, range
+      disconnect: -> @worker.disconnect()
 
-  connect: ->
-    @worker = new Worker @file
-    me = this
-    @worker.onmessage = (event) -> me._gotMessage event.data
-    @sendFn = (data) -> @worker.postMessage data
+    exports.NodeTaskMaster = NodeTaskMaster
 
-  disconnect: -> @worker.terminate()
+  class WebTaskMaster extends (TaskMaster)
+    @MAX_NUM_WORKERS     = 8
+    @DEFAULT_NUM_WORKERS = 4
 
-class TimeoutTaskMaster
-  @MAX_NUM_WORKERS     =  1
-  @DEFAULT_NUM_WORKERS =  1
+    constructor: (caller, cb, range, @file) ->
+      super caller, cb, range
 
-  constructor: (@_caller, @_cb) ->
-
-  sendData: (@_data) ->
-    delete @_stopFlag
-    @start()
-
-  start: ->
-    startTime = new Date()
-
-    until @_stopFlag? or @_data.result? or
-          (new Date() - startTime >= TIMEOUT_MAX_RUNTIME)
-      sha1.tryChallenge @_data
-
-    if @_stopFlag?
-      ## do nothing
-    else if @_data.result?
-      @_cb.call @_caller, @_data.result
-    else
+    connect: ->
+      @worker = new Worker @file
       me = this
-      setTimeout ( -> me.start()), TIMEOUT_YIELD_TIME
+      @worker.onmessage = (event) -> me._gotMessage event.data
+      @worker.onerror = (event) -> throw event.data
+      @sendFn = (data) -> @worker.postMessage data
 
-  stop: -> @_stopFlag = true
+    disconnect: -> @worker.terminate()
 
-exports.NodeTaskMaster    = NodeTaskMaster
-exports.WebTaskMaster     = WebTaskMaster
-exports.TimeoutTaskMaster = TimeoutTaskMaster
+  exports.WebTaskMaster = WebTaskMaster
+
+  class TimeoutTaskMaster
+    @MAX_NUM_WORKERS     =  1
+    @DEFAULT_NUM_WORKERS =  1
+
+    constructor: (@_caller, @_cb) ->
+
+    sendData: (@_data) ->
+      delete @_stopFlag
+      @start()
+
+    start: ->
+      startTime = new Date()
+
+      until @_stopFlag? or @_data.result? or
+            (new Date() - startTime >= TIMEOUT_MAX_RUNTIME)
+        sha1.tryChallenge @_data
+
+      if @_stopFlag?
+        ## do nothing
+      else if @_data.result?
+        @_cb.call @_caller, @_data.result
+      else
+        me = this
+        setTimeout ( -> me.start()), TIMEOUT_YIELD_TIME
+
+    stop: -> @_stopFlag = true
+
+  exports.TimeoutTaskMaster = TimeoutTaskMaster
+
+  return exports
