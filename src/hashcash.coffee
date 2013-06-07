@@ -3,7 +3,6 @@
 ## we use our own sha1 instead of crypto for a more lean browser
 ## implementation with browserify
 sha1       = require "./sha1"
-properties = require "./properties"
 
 { NodeTaskMaster, WebTaskMaster, TimeoutTaskMaster } = require "./taskmaster"
 
@@ -148,12 +147,8 @@ class HashCash
 
     @_workers = (
       for num in [ 1 .. numWorkers ]
-        worker = new type this, wrappedCb, @_range, workerFile
-        #properties.makeReadOnly worker
-        worker
+        new type this, wrappedCb, @_range, workerFile
     )
-
-    #properties.makeReadOnly type for type in [ @_workers, this ]
 
   ## PRIVATE
 
@@ -197,7 +192,5 @@ class HashCash
     return false if data.date < now - 1 or data.date > now + 1
 
     sha1.leading0s(HashCash.hash(str)) >= data.bits
-
-#properties.makeReadOnly type for type in [ HashCash, HashCash:: ]
 
 module.exports = HashCash

@@ -1,9 +1,8 @@
 "use strict"
 
-#os           = require "os"
+os           = require "os"
 childProcess = require "child_process"
 sha1         = require "./sha1"
-properties   = require "./properties"
 
 TIMEOUT_MAX_RUNTIME = 99
 TIMEOUT_YIELD_TIME  =  1
@@ -12,7 +11,6 @@ class TaskMaster
   @RANGE_INCREMENT: Math.pow 2, 15
 
   constructor: (@_caller, @_cb, @_range) ->
-    #properties.makeReadOnly this
 
   _send: (data) ->
     @_spawn()
@@ -52,19 +50,16 @@ class TaskMaster
     delete @sendFn
 
 class NodeTaskMaster extends (TaskMaster)
-  #@MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
-  @MAX_NUM_WORKERS = 8
+  @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
   @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
 
   constructor: (caller, cb, range) ->
     super caller, cb, range
-    properties.makeReadOnly this
 
   connect: ->
     @worker = childProcess.fork __dirname + "/worker.js"
     me = this
     @worker.on "message", (data) -> me._gotMessage data
-    properties.makeReadOnly @worker
     @sendFn = (data) -> @worker.send data
 
   disconnect: -> @worker.disconnect()
@@ -75,13 +70,11 @@ class WebTaskMaster extends (TaskMaster)
 
   constructor: (caller, cb, range, @file) ->
     super caller, cb, range
-    properties.makeReadOnly this
 
   connect: ->
     @worker = new Worker @file
     me = this
     @worker.onmessage = (event) -> me._gotMessage event.data
-    properties.makeReadOnly @worker
     @sendFn = (data) -> @worker.postMessage data
 
   disconnect: -> @worker.terminate()
@@ -91,7 +84,6 @@ class TimeoutTaskMaster
   @DEFAULT_NUM_WORKERS =  1
 
   constructor: (@_caller, @_cb) ->
-    properties.makeReadOnly this
 
   sendData: (@_data) ->
     delete @_stopFlag
@@ -113,17 +105,6 @@ class TimeoutTaskMaster
       setTimeout ( -> me.start()), TIMEOUT_YIELD_TIME
 
   stop: -> @_stopFlag = true
-
-properties.makeReadOnly type for type in [
-  TaskMaster,
-  TaskMaster::,
-  NodeTaskMaster,
-  NodeTaskMaster::,
-  WebTaskMaster,
-  WebTaskMaster::,
-  TimeoutTaskMaster,
-  TimeoutTaskMaster::
-]
 
 exports.NodeTaskMaster    = NodeTaskMaster
 exports.WebTaskMaster     = WebTaskMaster
