@@ -1,4 +1,6 @@
 should = require("chai").should()
+requirejs = require "requirejs"
+
 HashCash = require ".."
 
 describe "hashcash", ->

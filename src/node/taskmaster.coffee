@@ -3,8 +3,7 @@
 os           = require "os"
 path         = require "path"
 childProcess = require "child_process"
-
-requirejs = require "requirejs"
+requirejs    = require "requirejs"
 
 requirejs.config
   baseUrl: path.join __dirname, ".."
