@@ -156,13 +156,19 @@ module.exports = (grunt) ->
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
 
+  grunt.registerTask "clearNodeCache", "Clear the node require.cache", ->
+    for own key of require.cache
+      continue unless /\/requirejs\/bin\/r\.js$/.test key
+      delete require.cache[key]
+
   grunt.registerTask "test", [
+    "clearNodeCache"
     "cafemocha",
     "env:karma",
     "karma:continuous",
   ]
 
-  grunt.registerTask "watchTest", [ "cafemocha", "karma:browser:run" ]
+  grunt.registerTask "watchTest", [ "clearNodeCache", "cafemocha", "karma:browser:run" ]
 
   grunt.registerTask "example", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
@@ -204,5 +210,5 @@ module.exports = (grunt) ->
     "clean"
     "coffeelint"
     "build"
-    #"test"
+    "test"
   ]
