@@ -8,8 +8,10 @@ module.exports = (grunt) ->
         PHANTOMJS_BIN: "./node_modules/.bin/phantomjs"
 
     clean:
+      lib: "lib"
+      browser: "browser"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      karma: "test/browser/tmp"
+      #karma: "test/browser/tmp"
 
     coffee:
       options:
@@ -30,13 +32,13 @@ module.exports = (grunt) ->
         dest: "example/public/js"
         ext: ".js"
 
-      karma:
-        expand: true
-        flatten: true
-        cwd: "test/"
-        src: "*.coffee"
-        dest: "test/browser/tmp"
-        ext: ".js"
+      #karma:
+      #  expand: true
+      #  flatten: true
+      #  cwd: "test/"
+      #  src: "*.coffee"
+      #  dest: "test/browser/tmp"
+      #  ext: ".js"
 
     requirejs:
       options:
@@ -57,13 +59,14 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
+
       hashcash:
         options:
           include: [ "browser/main" ]
           out: "browser/hashcash.min.js"
           wrap:
-            startFile: "hashcash.start.frag"
-            endFile: "hashcash.end.frag"
+            startFile: "src/browser/hashcash.start.frag"
+            endFile: "src/browser/hashcash.end.frag"
 
       hashcash_worker:
         options:
@@ -113,7 +116,7 @@ module.exports = (grunt) ->
       options:
         reporter: "list"
         colors: false
-      src: [ "test/*.coffee", "!test/browser_*.coffee" ]
+      src: "test/*.coffee"
 
     karma:
       options:
@@ -150,9 +153,9 @@ module.exports = (grunt) ->
         tasks: "coffee:example"
       karma:
         tasks: [
-          "coffee:karma"
+          #"coffee:karma"
           #"requirejs:karma"
-          "clean:karma"
+          #"clean:karma"
         ]
 
   grunt.loadNpmTasks "grunt-env"
@@ -182,5 +185,5 @@ module.exports = (grunt) ->
     "clean"
     "coffeelint"
     "build"
-    "test"
+    #"test"
   ]

@@ -1,6 +1,6 @@
 resource = "zvelo.com"
 
-WORKER_FILE = "js/hashcash_worker.min.js"
+WORKER_FILE = "js/hashcash_worker.js"
 
 class Tester
   @STATUS_STOPPED: 0

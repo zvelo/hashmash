@@ -10,8 +10,21 @@ basePath = "..";
 files = [
   MOCHA,
   MOCHA_ADAPTER,
-  "test/browser/*.js",
+  REQUIRE,
+  REQUIRE_ADAPTER,
+
+  // node modules to include
+  { pattern: "node_modules/chai/chai.js", included: false },
+
+  // the module files
   { pattern: "browser/*.js", included: false },
+
+  // the actual test files
+  { pattern: "test/lib/tests/*.js",    included: false },
+  { pattern: "test/lib/tests/**/*.js", included: false },
+
+  // for test setup and execution
+  "test/lib/karma/main.js"
 ];
 
 

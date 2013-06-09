@@ -3,7 +3,7 @@
 
   resource = "zvelo.com";
 
-  WORKER_FILE = "js/hashcash_worker.min.js";
+  WORKER_FILE = "js/hashcash_worker.js";
 
   Tester = (function() {
     Tester.STATUS_STOPPED = 0;
