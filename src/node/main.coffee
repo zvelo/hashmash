@@ -7,9 +7,7 @@ requirejs.config
   baseUrl: path.join __dirname, ".."
   nodeRequire: require
 
-HashCash = requirejs "./hashcash"
-throw new Error "Unable to load HashCash" unless HashCash?
-
-HashCash.TaskMaster = require "./taskmaster"
+HashCash            = requirejs "./hashcash"
+HashCash.TaskMaster = requirejs "./node/taskmaster"
 
 module.exports = HashCash

@@ -1,29 +1,29 @@
 "use strict"
 
-os           = require "os"
-path         = require "path"
-childProcess = require "child_process"
-requirejs    = require "requirejs"
+define [
+  "os"
+  "path"
+  "module"
+  "child_process"
+  "../taskmaster"
+], (os, path, module, childProcess, taskmaster) ->
+  { TaskMaster } = taskmaster
+  __dirname = path.dirname module.uri
+  workerFile = path.join __dirname, "worker.js"
 
-requirejs.config
-  baseUrl: path.join __dirname, ".."
-  nodeRequire: require
+  class NodeTaskMaster extends (TaskMaster)
+    @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
+    @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
 
-{ TaskMaster } = requirejs "./taskmaster"
+    constructor: (caller, cb, range) ->
+      super caller, cb, range
 
-class NodeTaskMaster extends (TaskMaster)
-  @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
-  @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
+    connect: ->
+      @worker = childProcess.fork workerFile
+      me = this
+      @worker.on "message", (data) -> me._gotMessage data
+      @sendFn = (data) -> @worker.send data
 
-  constructor: (caller, cb, range) ->
-    super caller, cb, range
+    disconnect: -> @worker.disconnect()
 
-  connect: ->
-    @worker = childProcess.fork path.join __dirname, "worker.js"
-    me = this
-    @worker.on "message", (data) -> me._gotMessage data
-    @sendFn = (data) -> @worker.send data
-
-  disconnect: -> @worker.disconnect()
-
-module.exports = NodeTaskMaster
+  return NodeTaskMaster
