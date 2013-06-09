@@ -1,6 +1,10 @@
 "use strict"
 
-define [ "./copyright", "../hashcash", "../taskmaster" ], (cc, HashCash, taskmaster) ->
+define [
+  "./copyright"
+  "../hashcash"
+  "../taskmaster"
+], (cc, HashCash, taskmaster) ->
   { WebTaskMaster, TimeoutTaskMaster } = taskmaster
 
   if Worker?

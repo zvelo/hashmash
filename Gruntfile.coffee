@@ -8,10 +8,10 @@ module.exports = (grunt) ->
         PHANTOMJS_BIN: "./node_modules/.bin/phantomjs"
 
     clean:
-      lib: "lib"
+      lib: [ "lib/*.js", "lib/**/*.js" ]
       browser: "browser"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      #karma: "test/browser/tmp"
+      test: [ "test/lib/**/*.js", "test/lib/**/**/*.js" ]
 
     coffee:
       options:
@@ -32,13 +32,15 @@ module.exports = (grunt) ->
         dest: "example/public/js"
         ext: ".js"
 
-      #karma:
-      #  expand: true
-      #  flatten: true
-      #  cwd: "test/"
-      #  src: "*.coffee"
-      #  dest: "test/browser/tmp"
-      #  ext: ".js"
+      test:
+        expand: true
+        cwd: "test/src"
+        src: "**/main.coffee"
+        dest: "test/lib"
+        ext: ".js"
+
+    testFiles:
+      testType: [ "node", "requirejs" ]
 
     requirejs:
       options:
@@ -59,11 +61,10 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
-
       hashcash:
         options:
           include: [ "browser/main" ]
-          out: "browser/hashcash.min.js"
+          out: "browser/hashcash.js"
           wrap:
             startFile: "src/browser/hashcash.start.frag"
             endFile: "src/browser/hashcash.end.frag"
@@ -72,16 +73,7 @@ module.exports = (grunt) ->
         options:
           include: [ "browser/worker" ]
           insertRequire: [ "browser/worker" ]
-          out: "browser/hashcash_worker.min.js"
-
-      #karma:
-      #  options:
-      #    expand: true
-      #    flatten: true
-      #    cwd: "test/browser/tmp"
-      #    src: "*.js"
-      #    dest: "test/browser"
-      #    ext: ".js"
+          out: "browser/hashcash_worker.js"
 
     coffeelint:
       options:
@@ -107,16 +99,17 @@ module.exports = (grunt) ->
         no_stand_alone_at: level: "warn"
         arrow_spacing: level: "warn"
         coffeescript_error: level: "error"
-      src: "src/*.coffee"
-      test: "test/*.coffee"
+      src: [ "src/*.coffee", "src/**/*.coffee" ]
       example: [ "example/*.coffee", "example/src/*.coffee" ]
+      test: [ "test/src/**/*.coffee", "test/src/**/**/*.coffee" ]
       root: "*.coffee"
 
     cafemocha:
       options:
         reporter: "list"
         colors: false
-      src: "test/*.coffee"
+      node: "test/lib/node/*.js"
+      requirejs: "test/lib/mocha_requirejs/main.js"
 
     karma:
       options:
@@ -131,17 +124,14 @@ module.exports = (grunt) ->
 
     reallyWatch:
       src:
-        files: "src/*.coffee"
+        files: [ "src/*.coffee", "src/**/*.coffee" ]
         tasks: [ "coffeelint:src", "build:main", "watchTest" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
       test:
-        files: [ "test/*.coffee", "!test/browser_*.coffee" ]
-        tasks: [ "build:karma", "coffeelint:test", "watchTest" ]
-      browserTest:
-        files: [ "test/browser_*.coffee" ]
-        tasks: [ "build:karma", "coffeelint:test", "karma:browser:run" ]
+        files: [ "test/src/**/*.coffee", "test/src/**/**/*.coffee" ]
+        tasks: [ "coffeelint:test", "build:test", "watchTest" ]
       root:
         files: "*.coffee"
         tasks: "coffeelint:root"
@@ -151,12 +141,8 @@ module.exports = (grunt) ->
         tasks: [ "coffee:main", "requirejs" ]
       example:
         tasks: "coffee:example"
-      karma:
-        tasks: [
-          #"coffee:karma"
-          #"requirejs:karma"
-          #"clean:karma"
-        ]
+      test:
+        tasks: [ "testFiles", "coffee:test" ]
 
   grunt.loadNpmTasks "grunt-env"
   grunt.loadNpmTasks "grunt-karma"
@@ -170,16 +156,49 @@ module.exports = (grunt) ->
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
 
-  grunt.registerTask "test", [ "cafemocha", "env:karma", "karma:continuous" ]
+  grunt.registerTask "test", [
+    "cafemocha",
+    "env:karma",
+    "karma:continuous",
+  ]
+
+  grunt.registerTask "watchTest", [ "cafemocha", "karma:browser:run" ]
 
   grunt.registerTask "example", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
     require("./example/server").listen()
 
-  grunt.renameTask "watch", "reallyWatch"
+  grunt.renameTask   "watch", "reallyWatch"
   grunt.registerTask "watch", [ "karma:browser", "reallyWatch" ]
 
-  grunt.registerTask "watchTest", [ "cafemocha", "karma:browser:run" ]
+  grunt.registerMultiTask "testFiles", "Concat and build all test files", ->
+    baseDir = "test/src/base"
+    config = grunt.config "coffee"
+
+    for testType in @data
+      testDir = "test/src/#{testType}"
+      destDir = "test/lib/#{testType}"
+
+      tests = grunt.file.expand [
+        "#{testDir}/*.coffee"
+        "#{testDir}/**/*.coffee"
+      ]
+
+      for test in tests
+        testName = test[testDir.length + 1 .. test.lastIndexOf('.') - 1]
+        base = "#{baseDir}/#{testName}.coffee"
+        dest = "#{destDir}/#{testName}.js"
+
+        config.testFiles ?=
+          options:
+            join: true
+          files: {}
+
+        config.testFiles.files[dest] = [ base, test ]
+
+        grunt.config "coffee", config
+
+    grunt.task.run "coffee:testFiles"
 
   grunt.registerTask "default", [
     "clean"

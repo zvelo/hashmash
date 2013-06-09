@@ -1,13 +1,15 @@
 "use strict"
 
-define [ "HashCash" ], (HashCash) ->
+HashCash = undefined
+
+execute = ->
   NUM_BITS    = 20
   RESOURCE    = "zvelo.com"
   WORKER_FILE = "/base/browser/hashcash_worker.js"
 
   describe "web workers", ->
     it "should generate the hashcash using web workers", (done) ->
-      @timeout(20000)
+      @timeout(60000)
 
       cb = (result) ->
         hc.validate(result).should.equal true

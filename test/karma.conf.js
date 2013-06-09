@@ -20,8 +20,8 @@ files = [
   { pattern: "browser/*.js", included: false },
 
   // the actual test files
-  { pattern: "test/lib/tests/*.js",    included: false },
-  { pattern: "test/lib/tests/**/*.js", included: false },
+  { pattern: "test/lib/requirejs/*.js",    included: false },
+  { pattern: "test/lib/requirejs/**/*.js", included: false },
 
   // for test setup and execution
   "test/lib/karma/main.js"

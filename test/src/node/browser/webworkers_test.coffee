@@ -1,0 +1,2 @@
+HashCash = require "../../.."
+execute()

@@ -6,7 +6,7 @@ requirejs = require "requirejs"
 
 relRootDir = "../../.."
 rootDir = path.join __dirname, relRootDir
-baseDir = path.join rootDir, "test/lib/tests"
+baseDir = path.join rootDir, "test/lib/requirejs"
 
 findTests = (base, dir) ->
   tests = []

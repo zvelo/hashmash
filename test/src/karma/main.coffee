@@ -1,12 +1,12 @@
 "use strict"
 
 tests = Object.keys(window.__karma__.files).filter (file) ->
-  return /^\/base\/test\/lib\/tests\/.*\.js$/.test file
+  return /^\/base\/test\/lib\/requirejs\/.*\.js$/.test file
 
 relRootDir = "../../.."
 
 requirejs.config
-  baseUrl: "/base/test/lib/tests"
+  baseUrl: "/base/test/lib/requirejs"
   enforceDefine: true
   paths:
     chai:     "#{relRootDir}/node_modules/chai/chai"

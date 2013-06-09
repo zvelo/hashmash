@@ -1,6 +1,9 @@
-define [ "chai", "HashCash" ], (chai, HashCash) ->
-  should = chai.should()
+"use strict"
 
+should = undefined
+HashCash = undefined
+
+execute = ->
   describe "hashcash", ->
     describe "date", ->
       it "should match today", ->

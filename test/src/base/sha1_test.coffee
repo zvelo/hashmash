@@ -1,6 +1,8 @@
-define [ "HashCash" ], (HashCash) ->
-  sha1 = HashCash
+"use strict"
 
+sha1 = undefined
+
+execute = ->
   describe "sha1", ->
     describe "short", ->
       it "should match the known value", ->
