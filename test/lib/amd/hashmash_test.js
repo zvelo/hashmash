@@ -101,7 +101,7 @@
         return describe("success", function() {
           return it("should validate", function(done) {
             var cb, hc;
-            this.timeout(10000);
+            this.timeout(20000);
             cb = function(challenge) {
               hc.validate(challenge).should.equal(true);
               return done();

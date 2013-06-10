@@ -121,7 +121,7 @@ execute = ->
 
       describe "success", ->
         it "should validate", (done) ->
-          @timeout(10000)
+          @timeout(20000)
 
           cb = (challenge) ->
             hc.validate(challenge).should.equal true
