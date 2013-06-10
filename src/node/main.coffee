@@ -7,7 +7,7 @@ requirejs.config
   baseUrl: path.join __dirname, ".."
   nodeRequire: require
 
-HashCash            = requirejs "./hashcash"
-HashCash.TaskMaster = requirejs "./node/taskmaster"
+HashMash            = requirejs "./hashmash"
+HashMash.TaskMaster = requirejs "./node/taskmaster"
 
-module.exports = HashCash
+module.exports = HashMash

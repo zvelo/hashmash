@@ -1,5 +1,5 @@
 sha1 = undefined
 
-define [ "HashCash" ], (HashCash) ->
-  sha1 = HashCash
+define [ "HashMash" ], (HashMash) ->
+  sha1 = HashMash
   execute()

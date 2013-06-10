@@ -33,8 +33,8 @@
 
   sha1 = void 0;
 
-  define(["HashCash"], function(HashCash) {
-    sha1 = HashCash;
+  define(["HashMash"], function(HashMash) {
+    sha1 = HashMash;
     return execute();
   });
 

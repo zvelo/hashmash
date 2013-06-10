@@ -13,7 +13,7 @@
     enforceDefine: true,
     paths: {
       chai: "" + relRootDir + "/node_modules/chai/chai",
-      HashCash: "" + relRootDir + "/browser/hashcash"
+      HashMash: "" + relRootDir + "/browser/hashmash"
     },
     deps: ["chai"],
     callback: function(chai) {

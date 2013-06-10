@@ -1,6 +1,6 @@
 ###*
  * @license
- * zvelo HashCash Javascript Library
+ * zvelo HashMash Javascript Library
  *
  * Copyright 2013 zvelo, Inc. All Rights Reserved
  *

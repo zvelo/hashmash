@@ -24,7 +24,7 @@ define [ "./sha1" ], (sha1) ->
   ## hashcash format:
   ## ver:bits:date:resource:rand:counter
 
-  class HashCash
+  class HashMash
     ## STATIC
 
     @VERSION:   1
@@ -102,24 +102,24 @@ define [ "./sha1" ], (sha1) ->
     ## INSTANCE
 
     constructor: (@_bits, cb, caller, workerFile, numWorkers) ->
-      @_bits = HashCash.MIN_BITS if @_bits < HashCash.MIN_BITS
+      @_bits = HashMash.MIN_BITS if @_bits < HashMash.MIN_BITS
       @_workers = []
       @_range = {}
       @_resetRange()
 
       ###
       Use different strategies to ensure the main javascript thread is not
-      hung up while generating the hashcash
+      hung up while generating the hashmash
 
       1. Under Node, we use child_process
       2. In browsers that support it, use web workers
       3. In other browsers, use setTimeout
       ###
 
-      TaskMaster = HashCash.TaskMaster
+      TaskMaster = HashMash.TaskMaster
 
-      if not workerFile? and HashCash.BackupTaskMaster?
-        TaskMaster = HashCash.BackupTaskMaster
+      if not workerFile? and HashMash.BackupTaskMaster?
+        TaskMaster = HashMash.BackupTaskMaster
 
       if numWorkers?
         numWorkers = Math.min numWorkers, TaskMaster.MAX_NUM_WORKERS
@@ -156,14 +156,14 @@ define [ "./sha1" ], (sha1) ->
       @_resetRange()
 
       parts =
-        version: HashCash.VERSION
+        version: HashMash.VERSION
         bits: @_bits
-        date: HashCash.date()
+        date: HashMash.date()
         resource: resource
         rand: Math.random().toString(36).substr 2
 
       data =
-        challenge: HashCash.unparse parts
+        challenge: HashMash.unparse parts
         counter: 0
         bits: parts.bits
 
@@ -173,17 +173,17 @@ define [ "./sha1" ], (sha1) ->
       return false if not str?
       return false if not @_bits?
 
-      data = HashCash.parse str
+      data = HashMash.parse str
 
       return false if not data?
       return false if data.bits < @_bits
-      return false if data.bits < HashCash.MIN_BITS
+      return false if data.bits < HashMash.MIN_BITS
 
-      return false if data.version isnt HashCash.VERSION
+      return false if data.version isnt HashMash.VERSION
 
-      now = HashCash.date()
+      now = HashMash.date()
       return false if data.date < now - 1 or data.date > now + 1
 
-      sha1.leading0s(HashCash.hash(str)) >= data.bits
+      sha1.leading0s(HashMash.hash(str)) >= data.bits
 
-  return HashCash
+  return HashMash

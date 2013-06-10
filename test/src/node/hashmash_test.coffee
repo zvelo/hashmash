@@ -1,3 +1,3 @@
 should   = require("chai").should()
-HashCash = require "../../.."
+HashMash = require "../../.."
 execute()

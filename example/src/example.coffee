@@ -1,7 +1,7 @@
-define [ "jquery", "hashcash" ], ($, HashCash) ->
+define [ "jquery", "hashmash" ], ($, HashMash) ->
   resource = "zvelo.com"
 
-  WORKER_FILE = "js/hashcash_worker.js"
+  WORKER_FILE = "js/hashmash_worker.js"
 
   class Tester
     @STATUS_STOPPED: 0
@@ -17,18 +17,18 @@ define [ "jquery", "hashcash" ], ($, HashCash) ->
         when Tester.STATUS_RUNNING then @stop()
         else console.error "toggle from unknown state", @status
 
-    _hashCashCallback: (hashcash) ->
+    _hashMashCallback: (hashmash) ->
       duration = (new Date() - @_startTime) / 1000
       @_results.min = duration if not @_results.min? or duration < @_results.min
       @_results.max = duration if not @_results.max? or duration > @_results.max
       @_results.duration += duration
 
-      @_updateResults hashcash, duration
+      @_updateResults hashmash, duration
 
-      parsed = HashCash.parse hashcash
+      parsed = HashMash.parse hashmash
 
       if @_results.rands.hasOwnProperty(parsed.rand)
-        console.error "repeated hashcash"
+        console.error "repeated hashmash"
 
       @_results.rands[parsed.rand] = true
 
@@ -108,8 +108,8 @@ define [ "jquery", "hashcash" ], ($, HashCash) ->
 
       workerFile = if @_noWorkers then undefined else WORKER_FILE
 
-      @_hc = new HashCash @_numBits,
-                          @_hashCashCallback,
+      @_hc = new HashMash @_numBits,
+                          @_hashMashCallback,
                           this,
                           workerFile,
                           @_numWorkers
@@ -124,14 +124,14 @@ define [ "jquery", "hashcash" ], ($, HashCash) ->
 
       @_updateResults()
 
-    _updateResults: (hashcash, duration) ->
+    _updateResults: (hashmash, duration) ->
       averageDuration = 0
 
       if @_results.total_num
-        valid = @_hc.validate hashcash
+        valid = @_hc.validate hashmash
         averageDuration = @_results.duration / @_results.total_num
         console.log "test", @_results.total_num,
-                    hashcash, HashCash.hash(hashcash),
+                    hashmash, HashMash.hash(hashmash),
                     "valid", valid,
                     "duration", duration,
                     "status", @status,

@@ -26,7 +26,7 @@ if "development" is app.get("env")
   app.use express.errorHandler()
 
 app.get "/", (req, res) ->
-  res.render "index", title: "HashCash Example", port: app.get("port")
+  res.render "index", title: "HashMash Example", port: app.get("port")
 
 watch = [
   path.join __dirname, "../public/js"

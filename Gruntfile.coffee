@@ -61,19 +61,19 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
-      hashcash:
+      hashmash:
         options:
           include: [ "browser/main" ]
-          out: "browser/hashcash.js"
+          out: "browser/hashmash.js"
           wrap:
-            startFile: "src/browser/hashcash.start.frag"
-            endFile: "src/browser/hashcash.end.frag"
+            startFile: "src/browser/hashmash.start.frag"
+            endFile: "src/browser/hashmash.end.frag"
 
-      hashcash_worker:
+      hashmash_worker:
         options:
           include: [ "browser/worker" ]
           insertRequire: [ "browser/worker" ]
-          out: "browser/hashcash_worker.js"
+          out: "browser/hashmash_worker.js"
 
     coffeelint:
       options:

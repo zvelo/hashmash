@@ -1,8 +1,8 @@
 (function() {
-  define(["jquery", "hashcash"], function($, HashCash) {
+  define(["jquery", "hashmash"], function($, HashMash) {
     var Tester, WORKER_FILE, resource;
     resource = "zvelo.com";
-    WORKER_FILE = "js/hashcash_worker.js";
+    WORKER_FILE = "js/hashmash_worker.js";
     Tester = (function() {
       Tester.STATUS_STOPPED = 0;
 
@@ -24,7 +24,7 @@
         }
       };
 
-      Tester.prototype._hashCashCallback = function(hashcash) {
+      Tester.prototype._hashMashCallback = function(hashmash) {
         var duration, parsed;
         duration = (new Date() - this._startTime) / 1000;
         if ((this._results.min == null) || duration < this._results.min) {
@@ -34,10 +34,10 @@
           this._results.max = duration;
         }
         this._results.duration += duration;
-        this._updateResults(hashcash, duration);
-        parsed = HashCash.parse(hashcash);
+        this._updateResults(hashmash, duration);
+        parsed = HashMash.parse(hashmash);
         if (this._results.rands.hasOwnProperty(parsed.rand)) {
-          console.error("repeated hashcash");
+          console.error("repeated hashmash");
         }
         this._results.rands[parsed.rand] = true;
         if (this._results.num < this._numTests) {
@@ -105,7 +105,7 @@
         }
         console.log("loaded numTests", this._numTests, "numBits", this._numBits, "noWorkers", this._noWorkers, "numWorkers", this._numWorkers);
         workerFile = this._noWorkers ? void 0 : WORKER_FILE;
-        this._hc = new HashCash(this._numBits, this._hashCashCallback, this, workerFile, this._numWorkers);
+        this._hc = new HashMash(this._numBits, this._hashMashCallback, this, workerFile, this._numWorkers);
         this._results = {
           num: 0,
           total_num: 0,
@@ -117,13 +117,13 @@
         return this._updateResults();
       };
 
-      Tester.prototype._updateResults = function(hashcash, duration) {
+      Tester.prototype._updateResults = function(hashmash, duration) {
         var averageDuration, valid;
         averageDuration = 0;
         if (this._results.total_num) {
-          valid = this._hc.validate(hashcash);
+          valid = this._hc.validate(hashmash);
           averageDuration = this._results.duration / this._results.total_num;
-          console.log("test", this._results.total_num, hashcash, HashCash.hash(hashcash), "valid", valid, "duration", duration, "status", this.status, "average duration", averageDuration);
+          console.log("test", this._results.total_num, hashmash, HashMash.hash(hashmash), "valid", valid, "duration", duration, "status", this.status, "average duration", averageDuration);
         }
         $("#test-number").text(this._results.total_num);
         $("#average-duration").text(averageDuration);

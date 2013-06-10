@@ -1,3 +1,3 @@
-define [ "HashCash" ], (hashcash) ->
-  HashCash = hashcash
+define [ "HashMash" ], (hashmash) ->
+  HashMash = hashmash
   execute()

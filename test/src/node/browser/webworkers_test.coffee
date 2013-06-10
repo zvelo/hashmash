@@ -1,2 +1,2 @@
-HashCash = require "../../.."
+HashMash = require "../../.."
 execute()

@@ -2,17 +2,17 @@
 
 define [
   "./copyright"
-  "../hashcash"
+  "../hashmash"
   "../taskmaster"
-], (cc, HashCash, taskmaster) ->
+], (cc, HashMash, taskmaster) ->
   { WebTaskMaster, TimeoutTaskMaster } = taskmaster
 
   if Worker?
     ## browser with web workers
-    HashCash.TaskMaster       =     WebTaskMaster
-    HashCash.BackupTaskMaster = TimeoutTaskMaster
+    HashMash.TaskMaster       =     WebTaskMaster
+    HashMash.BackupTaskMaster = TimeoutTaskMaster
   else
     ## other browser
-    HashCash.TaskMaster = TimeoutTaskMaster
+    HashMash.TaskMaster = TimeoutTaskMaster
 
-  return HashCash
+  return HashMash

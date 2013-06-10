@@ -1,10 +1,10 @@
 "use strict"
 
 should = undefined
-HashCash = undefined
+HashMash = undefined
 
 execute = ->
-  describe "hashcash", ->
+  describe "hashmash", ->
     describe "date", ->
       it "should match today", ->
         now = new Date()
@@ -13,7 +13,7 @@ execute = ->
         month = now.getMonth() + 1
         day   = now.getDate()
 
-        date = HashCash.date()
+        date = HashMash.date()
         date.length.should.equal 6
 
         genYear  = parseInt date.substr(0, 2), 10
@@ -30,66 +30,66 @@ execute = ->
 
     describe "parse", ->
       parts =
-        version: HashCash.VERSION = 1
+        version: HashMash.VERSION = 1
         bits: 20
-        date: parseInt HashCash.date(), 10
+        date: parseInt HashMash.date(), 10
         rand: Math.random().toString(36).substr 2
         resource: "abcd"
         counter: 1
 
       describe "failure", ->
         it "should not parse", ->
-          should.not.exist HashCash.parse()
-          should.not.exist HashCash.parse("")
-          should.not.exist HashCash.parse("#{parts.version}")
-          should.not.exist HashCash.parse("#{parts.version}:")
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}")
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:")
+          should.not.exist HashMash.parse()
+          should.not.exist HashMash.parse("")
+          should.not.exist HashMash.parse("#{parts.version}")
+          should.not.exist HashMash.parse("#{parts.version}:")
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}")
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}:")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}::")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}:" +
                                           "#{parts.rand}")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}:" +
                                           "#{parts.rand}:")
 
-          should.not.exist HashCash.parse("#{parts.version}:#{parts.bits}:" +
+          should.not.exist HashMash.parse("#{parts.version}:#{parts.bits}:" +
                                           "#{parts.date}:#{parts.resource}:" +
                                           "#{parts.rand}:r")
 
       describe "success", ->
         it "should parse", ->
-          str = HashCash.unparse parts
+          str = HashMash.unparse parts
 
-          data = HashCash.parse str
+          data = HashMash.parse str
           should.exist data
           data.should.eql parts
 
-          data = HashCash.parse "#{str}:"
+          data = HashMash.parse "#{str}:"
           should.exist data
           data.should.eql parts
 
     describe "validate", ->
       parts =
-        version: HashCash.VERSION
+        version: HashMash.VERSION
         bits: 16
-        date: HashCash.date()
+        date: HashMash.date()
         rand: Math.random().toString(36).substr 2
         resource: "abcd"
 
@@ -98,13 +98,13 @@ execute = ->
           @timeout(105000)
 
           cb = (challenge) ->
-            challenge[0].should.equal "#{HashCash.VERSION}"
-            HashCash.VERSION.should.be.within 0, 8
-            challenge = "#{HashCash.VERSION + 1}#{challenge.substr 1}"
+            challenge[0].should.equal "#{HashMash.VERSION}"
+            HashMash.VERSION.should.be.within 0, 8
+            challenge = "#{HashMash.VERSION + 1}#{challenge.substr 1}"
             hc.validate(challenge).should.equal false
             done()
 
-          hc = new HashCash parts.bits, cb, this
+          hc = new HashMash parts.bits, cb, this
           hc.validate()
             .should.equal false
 
@@ -114,7 +114,7 @@ execute = ->
           hc.validate("", 0)
             .should.equal false
 
-          challenge = HashCash.unparse parts
+          challenge = HashMash.unparse parts
           hc.validate(challenge).should.equal false
 
           hc.generate parts.resource
@@ -127,5 +127,5 @@ execute = ->
             hc.validate(challenge).should.equal true
             done()
 
-          hc = new HashCash parts.bits, cb, this
+          hc = new HashMash parts.bits, cb, this
           hc.generate parts.resource
