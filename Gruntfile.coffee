@@ -168,7 +168,11 @@ module.exports = (grunt) ->
     "karma:continuous",
   ]
 
-  grunt.registerTask "watchTest", [ "clearNodeCache", "cafemocha", "karma:browser:run" ]
+  grunt.registerTask "watchTest", [
+    "clearNodeCache"
+    "cafemocha"
+    "karma:browser:run"
+  ]
 
   grunt.registerTask "example", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
