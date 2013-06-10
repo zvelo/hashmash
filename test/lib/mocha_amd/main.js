@@ -12,7 +12,7 @@
 
   rootDir = path.join(__dirname, relRootDir);
 
-  baseDir = path.join(rootDir, "test/lib/requirejs");
+  baseDir = path.join(rootDir, "test/lib/amd");
 
   findTests = function(base, dir) {
     var extension, file, name, stats, test, tests, _i, _len, _ref;
@@ -44,7 +44,7 @@
     enforceDefine: true,
     paths: {
       chai: "" + relRootDir + "/node_modules/chai/chai",
-      HashMash: "" + relRootDir + "/browser/hashmash"
+      HashMash: "" + relRootDir + "/amd/hashmash"
     }
   });
 

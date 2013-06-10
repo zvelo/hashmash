@@ -9,7 +9,7 @@ module.exports = (grunt) ->
 
     clean:
       lib: [ "lib/*.js", "lib/**/*.js" ]
-      browser: "browser"
+      amd: "amd"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
       test: [ "test/lib/**/*.js", "test/lib/**/**/*.js" ]
 
@@ -40,7 +40,7 @@ module.exports = (grunt) ->
         ext: ".js"
 
     testFiles:
-      testType: [ "node", "requirejs" ]
+      testType: [ "node", "amd" ]
 
     requirejs:
       options:
@@ -63,17 +63,17 @@ module.exports = (grunt) ->
 
       hashmash:
         options:
-          include: [ "browser/main" ]
-          out: "browser/hashmash.js"
+          include: [ "amd/main" ]
+          out: "amd/hashmash.js"
           wrap:
-            startFile: "src/browser/hashmash.start.frag"
-            endFile: "src/browser/hashmash.end.frag"
+            startFile: "src/amd/hashmash.start.frag"
+            endFile: "src/amd/hashmash.end.frag"
 
       hashmash_worker:
         options:
-          include: [ "browser/worker" ]
-          insertRequire: [ "browser/worker" ]
-          out: "browser/hashmash_worker.js"
+          include: [ "amd/worker" ]
+          insertRequire: [ "amd/worker" ]
+          out: "amd/hashmash_worker.js"
 
     coffeelint:
       options:
@@ -109,12 +109,12 @@ module.exports = (grunt) ->
         reporter: "list"
         colors: false
       node: "test/lib/node/*.js"
-      requirejs: "test/lib/mocha_requirejs/main.js"
+      amd: "test/lib/mocha_amd/main.js"
 
     karma:
       options:
         configFile: "test/karma.conf.js"
-      browser:
+      amd:
         background: true
       continuous:
         singleRun: true
@@ -171,7 +171,7 @@ module.exports = (grunt) ->
   grunt.registerTask "watchTest", [
     "clearNodeCache"
     "cafemocha"
-    "karma:browser:run"
+    "karma:amd:run"
   ]
 
   grunt.registerTask "example", "Start the example web server", ->
@@ -179,7 +179,7 @@ module.exports = (grunt) ->
     require("./example/server").listen()
 
   grunt.renameTask   "watch", "reallyWatch"
-  grunt.registerTask "watch", [ "karma:browser", "reallyWatch" ]
+  grunt.registerTask "watch", [ "karma:amd", "reallyWatch" ]
 
   grunt.registerMultiTask "testFiles", "Concat and build all test files", ->
     baseDir = "test/src/base"

@@ -17,11 +17,11 @@ files = [
   { pattern: "node_modules/chai/chai.js", included: false },
 
   // the module files
-  { pattern: "browser/*.js", included: false },
+  { pattern: "amd/*.js", included: false },
 
   // the actual test files
-  { pattern: "test/lib/requirejs/*.js",    included: false },
-  { pattern: "test/lib/requirejs/**/*.js", included: false },
+  { pattern: "test/lib/amd/*.js",    included: false },
+  { pattern: "test/lib/amd/**/*.js", included: false },
 
   // for test setup and execution
   "test/lib/karma/main.js"
