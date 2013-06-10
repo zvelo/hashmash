@@ -1,21 +1,20 @@
 {
-  "author": "Joshua Rubin <jrubin@zvelo.com>",
+  "author": "Joshua Rubin <jrubin@zvelo.com> (http://zvelo.com)",
   "name": "hashmash",
-  "description": "Javascript HashCash Implementation",
+  "description": "A generic HashCash implementation with support for node, amd (requirejs), and simple browser implementations. Uses node child_process or Web Workers where available to speed up hash generation and maintain page interactivity.",
+  "keywords": [],
   "version": "0.1.0",
-  "homepage": "http://zvelo.com",
+  "homepage": "http://zvelo.github.io/hashmash/",
+  "license": "BSD 3-Clause",
   "main": "./lib/node/main.js",
   "engines": {
-    "node": "~v0.8.15"
+    "node": "~v0.10.6"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/zvelo/hashmash.git"
   },
-  "license": "proprietary",
-  "private": true,
   "scripts": {
-    "build": "grunt build",
     "test": "grunt test"
   },
   "dependencies": {
