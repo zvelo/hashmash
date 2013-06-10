@@ -1,6 +1,6 @@
 {
   "author": "Joshua Rubin <jrubin@zvelo.com>",
-  "name": "hashcash",
+  "name": "hashmash",
   "description": "Javascript HashCash Implementation",
   "version": "0.1.0",
   "homepage": "http://zvelo.com",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zvelo/node-hashcash.git"
+    "url": "https://github.com/zvelo/hashmash.git"
   },
   "license": "proprietary",
   "private": true,
