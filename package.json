@@ -28,6 +28,7 @@
     "almond": "0.x.x",
     "tiny-lr": "0.x.x",
     "express": "3.x.x",
+    "amdefine": "0.x.x",
     "phantomjs": "1.x.x",
     "grunt": "0.x.x",
     "grunt-cli": "0.x.x",
