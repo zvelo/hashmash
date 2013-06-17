@@ -80,34 +80,36 @@
         };
         describe("failure", function() {
           return it("should not validate", function(done) {
-            var cb, challenge, hc;
+            var challenge, hc;
             this.timeout(105000);
-            cb = function(challenge) {
-              challenge[0].should.equal("" + HashMash.VERSION);
-              HashMash.VERSION.should.be.within(0, 8);
-              challenge = "" + (HashMash.VERSION + 1) + (challenge.substr(1));
-              hc.validate(challenge).should.equal(false);
-              return done();
-            };
-            hc = new HashMash(parts.bits, cb, this);
+            hc = new HashMash(parts.bits);
             hc.validate().should.equal(false);
             hc.validate("").should.equal(false);
             hc.validate("", 0).should.equal(false);
             challenge = HashMash.unparse(parts);
             hc.validate(challenge).should.equal(false);
-            return hc.generate(parts.resource);
+            return hc.generate(parts.resource).then(function(challenge) {
+              challenge[0].should.equal("" + HashMash.VERSION);
+              HashMash.VERSION.should.be.within(0, 8);
+              challenge = "" + (HashMash.VERSION + 1) + (challenge.substr(1));
+              hc.validate(challenge).should.equal(false);
+              return done();
+            }).otherwise(function() {
+              return done("HashMash generation failed");
+            });
           });
         });
         return describe("success", function() {
           return it("should validate", function(done) {
-            var cb, hc;
+            var hc;
             this.timeout(20000);
-            cb = function(challenge) {
+            hc = new HashMash(parts.bits);
+            return hc.generate(parts.resource).then(function(challenge) {
               hc.validate(challenge).should.equal(true);
               return done();
-            };
-            hc = new HashMash(parts.bits, cb, this);
-            return hc.generate(parts.resource);
+            }).otherwise(function() {
+              return done("HashMash generation failed");
+            });
           });
         });
       });

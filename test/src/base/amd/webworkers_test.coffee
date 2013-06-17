@@ -11,11 +11,11 @@ execute = ->
     it "should generate the hashmash using web workers", (done) ->
       @timeout(60000)
 
-      cb = (result) ->
-        hc.validate(result).should.equal true
-        parts = HashMash.parse result
-        parts.resource.should.equal(RESOURCE)
-        done()
-
-      hc = new HashMash NUM_BITS, cb, this, WORKER_FILE
-      hc.generate RESOURCE
+      hc = new HashMash NUM_BITS, WORKER_FILE
+      hc.generate(RESOURCE)
+        .then((result) ->
+          hc.validate(result).should.equal true
+          parts = HashMash.parse result
+          parts.resource.should.equal(RESOURCE)
+          done())
+        .otherwise(-> done("HashMash generation failed"))

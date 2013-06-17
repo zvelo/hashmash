@@ -15,9 +15,14 @@ files = [
 
   // node modules to include
   { pattern: "node_modules/chai/chai.js", included: false },
+  { pattern: "node_modules/when/when.js", included: false },
 
   // the module files
   { pattern: "amd/*.js", included: false },
+
+  // polyfills
+  { pattern: "lib/poly/*.js", included: false },
+  { pattern: "lib/poly/**/*.js", included: false },
 
   // the actual test files
   { pattern: "test/lib/amd/*.js",    included: false },

@@ -97,14 +97,8 @@ execute = ->
         it "should not validate", (done) ->
           @timeout(105000)
 
-          cb = (challenge) ->
-            challenge[0].should.equal "#{HashMash.VERSION}"
-            HashMash.VERSION.should.be.within 0, 8
-            challenge = "#{HashMash.VERSION + 1}#{challenge.substr 1}"
-            hc.validate(challenge).should.equal false
-            done()
+          hc = new HashMash parts.bits
 
-          hc = new HashMash parts.bits, cb, this
           hc.validate()
             .should.equal false
 
@@ -117,15 +111,22 @@ execute = ->
           challenge = HashMash.unparse parts
           hc.validate(challenge).should.equal false
 
-          hc.generate parts.resource
+          hc.generate(parts.resource)
+            .then((challenge) ->
+              challenge[0].should.equal "#{HashMash.VERSION}"
+              HashMash.VERSION.should.be.within 0, 8
+              challenge = "#{HashMash.VERSION + 1}#{challenge.substr 1}"
+              hc.validate(challenge).should.equal false
+              done())
+            .otherwise(-> done("HashMash generation failed"))
 
       describe "success", ->
         it "should validate", (done) ->
           @timeout(20000)
 
-          cb = (challenge) ->
-            hc.validate(challenge).should.equal true
-            done()
-
-          hc = new HashMash parts.bits, cb, this
-          hc.generate parts.resource
+          hc = new HashMash parts.bits
+          hc.generate(parts.resource)
+            .then((challenge) ->
+              hc.validate(challenge).should.equal true
+              done())
+            .otherwise(-> done("HashMash generation failed"))

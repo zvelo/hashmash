@@ -1,0 +1,3 @@
+[submodule "lib/poly"]
+	path = lib/poly
+	url = git://github.com/cujojs/poly.git
