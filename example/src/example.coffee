@@ -1,4 +1,4 @@
-define [ "jquery", "hashmash" ], ($, HashMash) ->
+define [ "hashmash" ], (HashMash) ->
   resource = "zvelo.com"
 
   WORKER_FILE = "js/hashmash_worker.js"
@@ -61,10 +61,9 @@ define [ "jquery", "hashmash" ], ($, HashMash) ->
 
       @_startTime = new Date()
 
-      try
-        @_hc.generate resource
-      catch e
-        console.error "error", e, e.stack
+      @_hc.generate(resource)
+        .then(@_hashMashCallback.bind this)
+        .otherwise((e) -> console.error "error", e, e.stack)
 
     stop: ->
       return unless @_hc? and @status is Tester.STATUS_RUNNING
@@ -108,11 +107,7 @@ define [ "jquery", "hashmash" ], ($, HashMash) ->
 
       workerFile = if @_noWorkers then undefined else WORKER_FILE
 
-      @_hc = new HashMash @_numBits,
-                          @_hashMashCallback,
-                          this,
-                          workerFile,
-                          @_numWorkers
+      @_hc = new HashMash @_numBits, workerFile, @_numWorkers
 
       @_results =
         num: 0

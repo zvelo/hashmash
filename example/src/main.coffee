@@ -3,4 +3,4 @@ requirejs.config
   paths:
     jquery: "//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min"
 
-require ["example"]
+require [ "poly/function", "jquery", "example" ]

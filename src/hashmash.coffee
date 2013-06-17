@@ -149,8 +149,7 @@ define [ "when", "./sha1" ], (whn, sha1) ->
     generate: (resource) ->
       @_resetRange()
 
-      deferred = whn.defer()
-      promise = deferred.promise
+      { resolver, promise } = whn.defer()
 
       parts =
         version: HashMash.VERSION
@@ -164,7 +163,10 @@ define [ "when", "./sha1" ], (whn, sha1) ->
         counter: 0
         bits: parts.bits
 
-      @_sendData deferred.resolver, data
+      try
+        @_sendData resolver, data
+      catch err
+        resolver.reject err
 
       promise.ensure @stop.bind(this)
 

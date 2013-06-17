@@ -184,9 +184,15 @@ module.exports = (grunt) ->
     "karma:amd:run"
   ]
 
-  grunt.registerTask "example", "Start the example web server", ->
+  grunt.registerTask "runExample", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
     require("./example/server").listen()
+
+  grunt.registerTask "example", [
+    "build:main"
+    "build:example"
+    "runExample"
+  ]
 
   grunt.registerMultiTask "testFiles", "Concat and build all test files", ->
     baseDir = "test/src/base"
