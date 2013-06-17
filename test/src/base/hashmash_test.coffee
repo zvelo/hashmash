@@ -122,7 +122,7 @@ execute = ->
 
       describe "success", ->
         it "should validate", (done) ->
-          @timeout(20000)
+          @timeout(30000)
 
           hc = new HashMash parts.bits
           hc.generate(parts.resource)
