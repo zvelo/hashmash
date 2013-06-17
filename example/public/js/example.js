@@ -1,5 +1,5 @@
 (function() {
-  define(["jquery", "hashmash"], function($, HashMash) {
+  define(["hashmash"], function(HashMash) {
     var Tester, WORKER_FILE, resource;
     resource = "zvelo.com";
     WORKER_FILE = "js/hashmash_worker.js";
@@ -49,7 +49,6 @@
       };
 
       Tester.prototype.start = function(reset) {
-        var e;
         if (!(resource.length && this._hc)) {
           return;
         }
@@ -66,12 +65,9 @@
         this._results.num += 1;
         this._results.total_num += 1;
         this._startTime = new Date();
-        try {
-          return this._hc.generate(resource);
-        } catch (_error) {
-          e = _error;
+        return this._hc.generate(resource).then(this._hashMashCallback.bind(this)).otherwise(function(e) {
           return console.error("error", e, e.stack);
-        }
+        });
       };
 
       Tester.prototype.stop = function() {
@@ -105,7 +101,7 @@
         }
         console.log("loaded numTests", this._numTests, "numBits", this._numBits, "noWorkers", this._noWorkers, "numWorkers", this._numWorkers);
         workerFile = this._noWorkers ? void 0 : WORKER_FILE;
-        this._hc = new HashMash(this._numBits, this._hashMashCallback, this, workerFile, this._numWorkers);
+        this._hc = new HashMash(this._numBits, workerFile, this._numWorkers);
         this._results = {
           num: 0,
           total_num: 0,

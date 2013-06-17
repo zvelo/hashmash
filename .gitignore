@@ -1,3 +1,8 @@
 *.swp
 *.map
+/amd
+/lib/*.js
+/lib/amd
+/lib/node
+/test/lib
 /node_modules

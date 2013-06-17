@@ -11,7 +11,16 @@ requirejs.config
   paths:
     chai:     "#{relRootDir}/node_modules/chai/chai"
     HashMash: "#{relRootDir}/amd/hashmash"
-  deps: [ "chai" ]
+  packages: [
+    name:     "when"
+    location: "#{relRootDir}/node_modules/when"
+    main:     "when"
+  ,
+    name:     "poly"
+    location: "#{relRootDir}/lib/poly"
+    main:     "poly"
+  ]
+  deps: [ "chai", "poly/function" ]
   callback: (chai) ->
     chai.should()
     requirejs tests, -> window.__karma__.start()

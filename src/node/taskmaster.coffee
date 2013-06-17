@@ -15,8 +15,7 @@ define [
     @MAX_NUM_WORKERS     = if os.cpus? then os.cpus().length else 4
     @DEFAULT_NUM_WORKERS = @MAX_NUM_WORKERS
 
-    constructor: (caller, cb, range) ->
-      super caller, cb, range
+    constructor: (range) -> super range
 
     connect: ->
       @worker = childProcess.fork workerFile

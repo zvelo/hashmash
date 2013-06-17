@@ -9,7 +9,7 @@ define [ "./sha1" ], (sha1) ->
   class TaskMaster
     @RANGE_INCREMENT: Math.pow 2, 15
 
-    constructor: (@_caller, @_cb, @_range) ->
+    constructor: (@_range) ->
       @_sendQueue = []
       @_ready = false
 
@@ -36,8 +36,9 @@ define [ "./sha1" ], (sha1) ->
       @_send m: "range", range: @_range
 
     _gotResult: (result) ->
-      return unless result?
-      @_cb.call @_caller, result
+      throw new Error "TaskMaster expected a result" unless result?
+      throw new Error "TaskMaster requires a resolver" unless @_resolver?
+      @_resolver.resolve result
 
     _gotMessage: (msg) ->
       return unless msg?.m?
@@ -46,9 +47,10 @@ define [ "./sha1" ], (sha1) ->
         when "ready" then @_setGo()
         when "request_range" then @_sendRange()
         when "result" then @_gotResult msg.result
-        when "console_log" then console.log "worker", msg.data
 
-    sendData: (data) -> @_send m: "data", data: data
+    sendData: (@_resolver, data) ->
+      throw new Error "TaskMaster requires a resolver" unless @_resolver?
+      @_send m: "data", data: data
 
     stop: ->
       @_ready = false
@@ -64,8 +66,7 @@ define [ "./sha1" ], (sha1) ->
     @MAX_NUM_WORKERS     = 8
     @DEFAULT_NUM_WORKERS = 4
 
-    constructor: (caller, cb, range, @file) ->
-      super caller, cb, range
+    constructor: (range, @file) -> super range
 
     connect: ->
       @worker = new Worker @file
@@ -82,9 +83,8 @@ define [ "./sha1" ], (sha1) ->
     @MAX_NUM_WORKERS     =  1
     @DEFAULT_NUM_WORKERS =  1
 
-    constructor: (@_caller, @_cb) ->
-
-    sendData: (@_data) ->
+    sendData: (@_resolver, @_data) ->
+      throw new Error "TaskMaster requires a resolver" unless @_resolver?
       delete @_stopFlag
       @start()
 
@@ -98,7 +98,8 @@ define [ "./sha1" ], (sha1) ->
       if @_stopFlag?
         ## do nothing
       else if @_data.result?
-        @_cb.call @_caller, @_data.result
+        throw new Error "TaskMaster requires a resolver" unless @_resolver?
+        @_resolver.resolve @_data.result
       else
         me = this
         setTimeout ( -> me.start()), TIMEOUT_YIELD_TIME

@@ -1,6 +1,6 @@
 "use strict"
 
-define [ "./sha1" ], (sha1) ->
+define [ "when", "./sha1" ], (whn, sha1) ->
   ## we use our own sha1 instead of crypto for a more lean browser
   ## implementation with requirejs
 
@@ -101,7 +101,7 @@ define [ "./sha1" ], (sha1) ->
 
     ## INSTANCE
 
-    constructor: (@_bits, cb, caller, workerFile, numWorkers) ->
+    constructor: (@_bits, workerFile, numWorkers) ->
       @_bits = HashMash.MIN_BITS if @_bits < HashMash.MIN_BITS
       @_workers = []
       @_range = {}
@@ -130,23 +130,17 @@ define [ "./sha1" ], (sha1) ->
 
       console.log "using #{numWorkers} workers"
 
-      wrappedCb = (result) ->
-        ## prevent races where multiple workers returned a result
-        @stop()
-        if caller?
-          cb.call caller, result
-        else
-          cb result
-
       @_workers = (
         for num in [ 1 .. numWorkers ]
-          new TaskMaster this, wrappedCb, @_range, workerFile
+          new TaskMaster @_range, workerFile
       )
 
     ## PRIVATE
 
     _resetRange: -> @_range = begin: 0, end: -1
-    _sendData: (data) -> worker.sendData data for worker in @_workers
+    _sendData: (resolver, data) ->
+      for worker in @_workers
+        worker.sendData resolver, data
 
     ## PUBLIC
 
@@ -154,6 +148,8 @@ define [ "./sha1" ], (sha1) ->
 
     generate: (resource) ->
       @_resetRange()
+
+      { resolver, promise } = whn.defer()
 
       parts =
         version: HashMash.VERSION
@@ -167,7 +163,14 @@ define [ "./sha1" ], (sha1) ->
         counter: 0
         bits: parts.bits
 
-      @_sendData data
+      try
+        @_sendData resolver, data
+      catch err
+        resolver.reject err
+
+      promise.ensure @stop.bind(this)
+
+      return promise
 
     validate: (str) ->
       return false if not str?

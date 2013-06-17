@@ -20,6 +20,7 @@ app.use tinylr.middleware app: app
 app.use express.static(path.join(__dirname, "../public"))
 app.use "/js", express.static(path.join(__dirname, "../../amd"))
 app.use "/js", express.static(path.join(__dirname, "../../node_modules/requirejs"))
+app.use "/js/poly", express.static(path.join(__dirname, "../../lib/poly"))
 
 ## development only
 if "development" is app.get("env")

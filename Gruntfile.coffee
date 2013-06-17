@@ -3,15 +3,11 @@ module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON "package.json"
 
-    env:
-      karma:
-        PHANTOMJS_BIN: "./node_modules/.bin/phantomjs"
-
     clean:
-      lib: [ "lib/*.js", "lib/**/*.js" ]
+      lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
       amd: "amd"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      test: [ "test/lib/**/*.js", "test/lib/**/**/*.js" ]
+      test: [ "test/lib" ]
 
     coffee:
       options:
@@ -50,6 +46,15 @@ module.exports = (grunt) ->
         preserveLicenseComments: false
         paths:
           almond: "../node_modules/almond/almond"
+        packages: [
+          name:     "when"
+          location: "../node_modules/when"
+          main:     "when"
+        ,
+          name:     "poly"
+          location: "poly"
+          main:     "poly"
+        ]
         optimize: "uglify2"
         wrap: true
         uglify2:
@@ -63,7 +68,7 @@ module.exports = (grunt) ->
 
       hashmash:
         options:
-          include: [ "amd/main" ]
+          include: [ "poly/function", "amd/main" ]
           out: "amd/hashmash.js"
           wrap:
             startFile: "src/amd/hashmash.start.frag"
@@ -144,12 +149,18 @@ module.exports = (grunt) ->
       test:
         tasks: [ "testFiles", "coffee:test" ]
 
-  grunt.loadNpmTasks "grunt-env"
-  grunt.loadNpmTasks "grunt-karma"
-  grunt.loadNpmTasks "grunt-cafe-mocha"
-  grunt.loadNpmTasks "grunt-coffeelint"
-  grunt.loadNpmTasks "grunt-contrib-clean"
-  grunt.loadNpmTasks "grunt-contrib-watch"
+  unless process.env.NODE_ENV is "production"
+    grunt.loadNpmTasks "grunt-karma"
+    grunt.loadNpmTasks "grunt-cafe-mocha"
+    grunt.loadNpmTasks "grunt-coffeelint"
+    grunt.loadNpmTasks "grunt-contrib-clean"
+    grunt.loadNpmTasks "grunt-contrib-watch"
+
+    grunt.renameTask   "watch", "reallyWatch"
+    grunt.registerTask "watch", [ "karma:amd", "reallyWatch" ]
+
+    process.env.PHANTOMJS_BIN = require("phantomjs").path
+
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-contrib-requirejs"
 
@@ -164,7 +175,6 @@ module.exports = (grunt) ->
   grunt.registerTask "test", [
     "clearNodeCache"
     "cafemocha",
-    "env:karma",
     "karma:continuous",
   ]
 
@@ -174,12 +184,15 @@ module.exports = (grunt) ->
     "karma:amd:run"
   ]
 
-  grunt.registerTask "example", "Start the example web server", ->
+  grunt.registerTask "runExample", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
     require("./example/server").listen()
 
-  grunt.renameTask   "watch", "reallyWatch"
-  grunt.registerTask "watch", [ "karma:amd", "reallyWatch" ]
+  grunt.registerTask "example", [
+    "build:main"
+    "build:example"
+    "runExample"
+  ]
 
   grunt.registerMultiTask "testFiles", "Concat and build all test files", ->
     baseDir = "test/src/base"

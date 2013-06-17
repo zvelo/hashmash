@@ -6,7 +6,7 @@
     }
   });
 
-  require(["example"]);
+  require(["poly/function", "jquery", "example"]);
 
 }).call(this);
 
