@@ -7,7 +7,7 @@ module.exports = (grunt) ->
       lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
       amd: "amd"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      test: [ "test/lib/**/*.js", "test/lib/**/**/*.js" ]
+      test: [ "test/lib" ]
 
     coffee:
       options:
