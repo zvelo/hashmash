@@ -149,20 +149,21 @@ module.exports = (grunt) ->
       test:
         tasks: [ "testFiles", "coffee:test" ]
 
-  unless process.env.NODE_ENV is "production"
-    grunt.loadNpmTasks "grunt-karma"
-    grunt.loadNpmTasks "grunt-cafe-mocha"
-    grunt.loadNpmTasks "grunt-coffeelint"
-    grunt.loadNpmTasks "grunt-contrib-clean"
-    grunt.loadNpmTasks "grunt-contrib-watch"
-
-    grunt.renameTask   "watch", "reallyWatch"
-    grunt.registerTask "watch", [ "karma:amd", "reallyWatch" ]
-
-    process.env.PHANTOMJS_BIN = require("phantomjs").path
-
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-contrib-requirejs"
+
+  unless process.env.NODE_ENV is "production"
+    try
+      grunt.loadNpmTasks "grunt-karma"
+      grunt.loadNpmTasks "grunt-cafe-mocha"
+      grunt.loadNpmTasks "grunt-coffeelint"
+      grunt.loadNpmTasks "grunt-contrib-clean"
+      grunt.loadNpmTasks "grunt-contrib-watch"
+
+      grunt.renameTask   "watch", "reallyWatch"
+      grunt.registerTask "watch", [ "karma:amd", "reallyWatch" ]
+
+      process.env.PHANTOMJS_BIN = require("phantomjs").path
 
   grunt.registerMultiTask "build", "Build project files", ->
     grunt.task.run @data.tasks
