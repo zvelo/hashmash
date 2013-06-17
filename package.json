@@ -3,7 +3,7 @@
   "name": "hashmash",
   "description": "A generic HashCash implementation with support for node, amd (requirejs), and simple browser implementations. Uses node child_process or Web Workers where available to speed up hash generation and maintain responsiveness.",
   "keywords": [],
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "http://zvelo.github.io/hashmash/",
   "bugs": "https://github.com/zvelo/hashmash/issues",
   "license": "BSD",
@@ -17,30 +17,28 @@
     "url": "https://github.com/zvelo/hashmash.git"
   },
   "scripts": {
-    "pretest": "./node_modules/.bin/grunt build:test",
-    "test": "./node_modules/.bin/grunt test",
-    "postinstall": "./node_modules/.bin/grunt build:main"
+    "test": "./node_modules/.bin/grunt test"
   },
   "dependencies": {
     "when": "2.x.x",
-    "almond": "0.x.x",
-    "requirejs": "2.x.x",
-    "grunt": "0.x.x",
-    "grunt-cli": "0.x.x",
-    "grunt-contrib-coffee": "0.x.x",
-    "grunt-contrib-requirejs": "0.x.x"
+    "requirejs": "2.x.x"
   },
   "devDependencies": {
     "chai": "1.x.x",
     "jade": "0.x.x",
+    "almond": "0.x.x",
     "tiny-lr": "0.x.x",
     "express": "3.x.x",
     "amdefine": "0.x.x",
     "phantomjs": "1.x.x",
+    "grunt": "0.x.x",
+    "grunt-cli": "0.x.x",
     "grunt-karma": "0.x.x",
     "grunt-cafe-mocha": "0.x.x",
     "grunt-coffeelint": "0.x.x",
     "grunt-contrib-clean": "0.x.x",
-    "grunt-contrib-watch": "0.x.x"
+    "grunt-contrib-watch": "0.x.x",
+    "grunt-contrib-coffee": "0.x.x",
+    "grunt-contrib-requirejs": "0.x.x"
   }
 }
