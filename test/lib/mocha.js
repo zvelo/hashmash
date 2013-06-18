@@ -8,7 +8,7 @@
 
   requirejs = require("requirejs");
 
-  relRootDir = "../../..";
+  relRootDir = "../..";
 
   rootDir = path.join(__dirname, relRootDir);
 
@@ -62,5 +62,5 @@
 }).call(this);
 
 /*
-//@ sourceMappingURL=main.js.map
+//@ sourceMappingURL=mocha.js.map
 */

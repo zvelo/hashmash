@@ -26,10 +26,10 @@ files = [
 
   // the actual test files
   { pattern: "test/lib/amd/*.js",    included: false },
-  { pattern: "test/lib/amd/**/*.js", included: false },
+  { pattern: "test/lib/amd/karma/*.js", included: false },
 
   // for test setup and execution
-  "test/lib/karma/main.js"
+  "test/lib/karma.js"
 ];
 
 

@@ -38,5 +38,5 @@
 }).call(this);
 
 /*
-//@ sourceMappingURL=main.js.map
+//@ sourceMappingURL=karma.js.map
 */

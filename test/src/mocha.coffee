@@ -4,7 +4,7 @@ fs        = require "fs"
 path      = require "path"
 requirejs = require "requirejs"
 
-relRootDir = "../../.."
+relRootDir = "../.."
 rootDir = path.join __dirname, relRootDir
 baseDir = path.join rootDir, "test/lib/amd"
 
