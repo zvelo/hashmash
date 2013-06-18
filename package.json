@@ -3,7 +3,7 @@
   "name": "hashmash",
   "description": "A generic HashCash implementation with support for node, amd (requirejs), and simple browser implementations. Uses node child_process or Web Workers where available to speed up hash generation and maintain responsiveness.",
   "keywords": [],
-  "version": "0.1.3",
+  "version": "0.1.4",
   "homepage": "http://zvelo.github.io/hashmash/",
   "bugs": "https://github.com/zvelo/hashmash/issues",
   "license": "BSD",
