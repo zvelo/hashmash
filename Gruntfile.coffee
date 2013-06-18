@@ -5,7 +5,7 @@ module.exports = (grunt) ->
 
     clean:
       lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
-      optimized: "optimized"
+      optimized: [ "hashmash.js", "worker.js" ]
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
       test: [ "test/lib" ]
 
@@ -69,7 +69,7 @@ module.exports = (grunt) ->
       hashmash:
         options:
           include: [ "poly/function", "copyright", "main" ]
-          out: "optimized/hashmash.js"
+          out: "hashmash.js"
           wrap:
             startFile: "src/hashmash.start.frag"
             endFile: "src/hashmash.end.frag"
@@ -78,7 +78,7 @@ module.exports = (grunt) ->
         options:
           include: [ "copyright", "worker" ]
           insertRequire: [ "worker" ]
-          out: "optimized/hashmash_worker.js"
+          out: "worker.js"
 
     coffeelint:
       options:

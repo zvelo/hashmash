@@ -1,3 +1,3 @@
-define [ "HashMash" ], (hashmash) ->
+define [ "hashmash" ], (hashmash) ->
   HashMash = hashmash
   execute()

@@ -30,6 +30,6 @@ execute = ->
 
 sha1 = undefined
 
-define [ "HashMash" ], (HashMash) ->
+define [ "hashmash" ], (HashMash) ->
   sha1 = HashMash
   execute()

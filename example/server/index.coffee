@@ -32,7 +32,7 @@ app.get "/", (req, res) ->
 
 watch = [
   path.join __dirname, "../public/js"
-  path.join __dirname, "../../optimized"
+  path.join __dirname, "../.."
   path.join __dirname, "../views"
 ]
 

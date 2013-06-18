@@ -10,7 +10,7 @@ requirejs.config
   enforceDefine: true
   paths:
     chai:     "#{relRootDir}/node_modules/chai/chai"
-    HashMash: "#{relRootDir}/optimized/hashmash"
+    hashmash: "#{relRootDir}/hashmash"
   packages: [
     name:     "when"
     location: "#{relRootDir}/node_modules/when"

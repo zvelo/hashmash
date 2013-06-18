@@ -5,7 +5,7 @@ HashMash = undefined
 execute = ->
   NUM_BITS    = 20
   RESOURCE    = "zvelo.com"
-  WORKER_FILE = "/base/optimized/hashmash_worker.js"
+  WORKER_FILE = "/base/worker.js"
 
   describe "web workers", ->
     it "should generate the hashmash using web workers", (done) ->

@@ -116,7 +116,7 @@
     });
   };
 
-  define(["chai", "HashMash"], function(chai, hashmash) {
+  define(["chai", "hashmash"], function(chai, hashmash) {
     should = chai.should();
     HashMash = hashmash;
     return execute();

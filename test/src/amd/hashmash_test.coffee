@@ -1,4 +1,4 @@
-define [ "chai", "HashMash" ], (chai, hashmash) ->
+define [ "chai", "hashmash" ], (chai, hashmash) ->
   should = chai.should()
   HashMash = hashmash
   execute()
