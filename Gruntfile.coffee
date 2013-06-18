@@ -13,7 +13,7 @@ module.exports = (grunt) ->
       options:
         sourceMap: true
 
-      main:
+      lib:
         expand: true
         cwd: "src"
         src: [ "*.coffee", "**/*.coffee" ]
@@ -40,7 +40,7 @@ module.exports = (grunt) ->
 
     requirejs:
       options:
-        baseUrl: "lib"
+        baseUrl: "."
         name: "almond"
         generateSourceMaps: true
         preserveLicenseComments: false
@@ -68,7 +68,7 @@ module.exports = (grunt) ->
 
       hashmash:
         options:
-          include: [ "poly/function", "copyright", "main" ]
+          include: [ "lib/poly/function", "copyright", "main" ]
           out: "hashmash.min.js"
           wrap:
             startFile: "src/hashmash.start.frag"
@@ -128,22 +128,22 @@ module.exports = (grunt) ->
         browsers: [ "PhantomJS" ]
 
     reallyWatch:
+      main:
+        files: "*.coffee"
+        tasks: "watchTest"
       src:
         files: [ "src/*.coffee", "src/**/*.coffee" ]
-        tasks: [ "coffeelint:src", "build:main", "watchTest" ]
+        tasks: [ "coffeelint:src", "build:lib", "watchTest" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
       test:
         files: [ "test/src/**/*.coffee", "test/src/**/**/*.coffee" ]
         tasks: [ "coffeelint:test", "build:test", "watchTest" ]
-      root:
-        files: "*.coffee"
-        tasks: "coffeelint:root"
 
     build:
-      main:
-        tasks: [ "coffee:main", "requirejs" ]
+      lib:
+        tasks: [ "coffee:lib", "requirejs" ]
       example:
         tasks: "coffee:example"
       test:
