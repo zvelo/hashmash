@@ -33,7 +33,7 @@ requirejs.config
   enforceDefine: true
   paths:
     chai:     "#{relRootDir}/node_modules/chai/chai"
-    HashMash: "#{relRootDir}/amd/hashmash"
+    HashMash: "#{relRootDir}/optimized/hashmash"
 
 describe "TestRunner", ->
   it "should run all tests", (done) ->
