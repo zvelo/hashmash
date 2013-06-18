@@ -68,16 +68,16 @@ module.exports = (grunt) ->
 
       hashmash:
         options:
-          include: [ "poly/function", "amd/main" ]
+          include: [ "poly/function", "copyright", "main" ]
           out: "optimized/hashmash.js"
           wrap:
-            startFile: "src/amd/hashmash.start.frag"
-            endFile: "src/amd/hashmash.end.frag"
+            startFile: "src/hashmash.start.frag"
+            endFile: "src/hashmash.end.frag"
 
       hashmash_worker:
         options:
-          include: [ "amd/worker" ]
-          insertRequire: [ "amd/worker" ]
+          include: [ "copyright", "worker" ]
+          insertRequire: [ "worker" ]
           out: "optimized/hashmash_worker.js"
 
     coffeelint:

@@ -1,7 +1,7 @@
 define [ "hashmash" ], (HashMash) ->
   resource = "zvelo.com"
 
-  WORKER_FILE = "js/hashmash_worker.js"
+  WORKER_FILE = "js/worker.js"
 
   class Tester
     @STATUS_STOPPED: 0

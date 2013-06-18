@@ -1,10 +1,9 @@
 "use strict"
 
 define [
-  "./copyright"
-  "../hashmash"
-  "../taskmaster"
-], (cc, HashMash, taskmaster) ->
+  "./hashmash"
+  "./taskmaster"
+], (HashMash, taskmaster) ->
   { WebTaskMaster, TimeoutTaskMaster } = taskmaster
 
   if Worker?
