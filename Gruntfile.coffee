@@ -4,16 +4,28 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON "package.json"
 
     clean:
-      lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
-      amd: "amd"
-      example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      test: [ "test/lib" ]
+      lib: [
+        "lib/*.js"
+        "lib/*.map"
+        "lib/**/*.js"
+        "lib/**/*.map"
+        "!lib/poly/*.js"
+        "!lib/poly/**/*.js"
+      ]
+      optimized: ["*.min.js", "*.map" ]
+      example: [
+        "example/public/js/*.js"
+        "example/public/js/*.map"
+        "!example/public/js/main.js"
+        "!example/public/js/worker.js"
+      ]
+      test: [ "test/lib/*" ]
 
     coffee:
       options:
         sourceMap: true
 
-      main:
+      lib:
         expand: true
         cwd: "src"
         src: [ "*.coffee", "**/*.coffee" ]
@@ -31,7 +43,7 @@ module.exports = (grunt) ->
       test:
         expand: true
         cwd: "test/src"
-        src: "**/main.coffee"
+        src: "*.coffee"
         dest: "test/lib"
         ext: ".js"
 
@@ -40,15 +52,15 @@ module.exports = (grunt) ->
 
     requirejs:
       options:
-        baseUrl: "lib"
+        baseUrl: "."
         name: "almond"
         generateSourceMaps: true
         preserveLicenseComments: false
         paths:
-          almond: "../node_modules/almond/almond"
+          almond: "node_modules/almond/almond"
         packages: [
           name:     "when"
-          location: "../node_modules/when"
+          location: "node_modules/when"
           main:     "when"
         ,
           name:     "poly"
@@ -66,19 +78,19 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
-      hashmash:
+      "hashmash.min.js":
         options:
-          include: [ "poly/function", "amd/main" ]
-          out: "amd/hashmash.js"
+          include: [ "lib/poly/function", "copyright", "hashmash" ]
+          out: "hashmash.min.js"
           wrap:
-            startFile: "src/amd/hashmash.start.frag"
-            endFile: "src/amd/hashmash.end.frag"
+            startFile: "src/hashmash.start.frag"
+            endFile: "src/hashmash.end.frag"
 
-      hashmash_worker:
+      "worker.min.js":
         options:
-          include: [ "amd/worker" ]
-          insertRequire: [ "amd/worker" ]
-          out: "amd/hashmash_worker.js"
+          include: [ "copyright", "worker" ]
+          insertRequire: [ "worker" ]
+          out: "worker.min.js"
 
     coffeelint:
       options:
@@ -114,7 +126,7 @@ module.exports = (grunt) ->
         reporter: "list"
         colors: false
       node: "test/lib/node/*.js"
-      amd: "test/lib/mocha_amd/main.js"
+      amd: "test/lib/mocha.js"
 
     karma:
       options:
@@ -128,22 +140,22 @@ module.exports = (grunt) ->
         browsers: [ "PhantomJS" ]
 
     reallyWatch:
+      main:
+        files: "*.coffee"
+        tasks: "watchTest"
       src:
         files: [ "src/*.coffee", "src/**/*.coffee" ]
-        tasks: [ "coffeelint:src", "build:main", "watchTest" ]
+        tasks: [ "coffeelint:src", "build:lib", "watchTest" ]
       example:
         files: [ "example/*.coffee", "example/src/*.coffee" ]
         tasks: [ "coffeelint:example", "build:example" ]
       test:
         files: [ "test/src/**/*.coffee", "test/src/**/**/*.coffee" ]
         tasks: [ "coffeelint:test", "build:test", "watchTest" ]
-      root:
-        files: "*.coffee"
-        tasks: "coffeelint:root"
 
     build:
-      main:
-        tasks: [ "coffee:main", "requirejs" ]
+      lib:
+        tasks: [ "coffee:lib", "requirejs" ]
       example:
         tasks: "coffee:example"
       test:
@@ -185,15 +197,9 @@ module.exports = (grunt) ->
     "karma:amd:run"
   ]
 
-  grunt.registerTask "runExample", "Start the example web server", ->
+  grunt.registerTask "example", "Start the example web server", ->
     done = @async() ## by never calling done, the server is kept alive
     require("./example/server").listen()
-
-  grunt.registerTask "example", [
-    "build:main"
-    "build:example"
-    "runExample"
-  ]
 
   grunt.registerMultiTask "testFiles", "Concat and build all test files", ->
     baseDir = "test/src/base"

@@ -18,7 +18,7 @@ files = [
   { pattern: "node_modules/when/when.js", included: false },
 
   // the module files
-  { pattern: "amd/*.js", included: false },
+  { pattern: "*.min.js", included: false },
 
   // polyfills
   { pattern: "lib/poly/*.js", included: false },
@@ -26,10 +26,10 @@ files = [
 
   // the actual test files
   { pattern: "test/lib/amd/*.js",    included: false },
-  { pattern: "test/lib/amd/**/*.js", included: false },
+  { pattern: "test/lib/amd/karma/*.js", included: false },
 
   // for test setup and execution
-  "test/lib/karma/main.js"
+  "test/lib/karma.js"
 ];
 
 

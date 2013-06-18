@@ -2,7 +2,7 @@
   define(["hashmash"], function(HashMash) {
     var Tester, WORKER_FILE, resource;
     resource = "zvelo.com";
-    WORKER_FILE = "js/hashmash_worker.js";
+    WORKER_FILE = "js/worker.js";
     Tester = (function() {
       Tester.STATUS_STOPPED = 0;
 

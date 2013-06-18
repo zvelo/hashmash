@@ -8,7 +8,7 @@
 
   requirejs = require("requirejs");
 
-  relRootDir = "../../..";
+  relRootDir = "../..";
 
   rootDir = path.join(__dirname, relRootDir);
 
@@ -44,7 +44,7 @@
     enforceDefine: true,
     paths: {
       chai: "" + relRootDir + "/node_modules/chai/chai",
-      HashMash: "" + relRootDir + "/amd/hashmash"
+      hashmash: "" + relRootDir + "/hashmash"
     }
   });
 
@@ -62,5 +62,5 @@
 }).call(this);
 
 /*
-//@ sourceMappingURL=main.js.map
+//@ sourceMappingURL=mocha.js.map
 */

@@ -33,7 +33,7 @@
 
   sha1 = void 0;
 
-  define(["HashMash"], function(HashMash) {
+  define(["hashmash"], function(HashMash) {
     sha1 = HashMash;
     return execute();
   });

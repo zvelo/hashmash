@@ -1,4 +1,4 @@
-###*
+/**
  * @author Joshua Rubin <jrubin@zvelo.com>
  *
  * @license
@@ -48,4 +48,9 @@
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  *
-###
+ */
+
+(function () {
+    "use strict";
+    return true;
+}());

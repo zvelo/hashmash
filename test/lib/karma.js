@@ -13,7 +13,7 @@
     enforceDefine: true,
     paths: {
       chai: "" + relRootDir + "/node_modules/chai/chai",
-      HashMash: "" + relRootDir + "/amd/hashmash"
+      hashmash: "" + relRootDir + "/hashmash.min"
     },
     packages: [
       {
@@ -38,5 +38,5 @@
 }).call(this);
 
 /*
-//@ sourceMappingURL=main.js.map
+//@ sourceMappingURL=karma.js.map
 */

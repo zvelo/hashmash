@@ -4,7 +4,7 @@ fs        = require "fs"
 path      = require "path"
 requirejs = require "requirejs"
 
-relRootDir = "../../.."
+relRootDir = "../.."
 rootDir = path.join __dirname, relRootDir
 baseDir = path.join rootDir, "test/lib/amd"
 
@@ -33,7 +33,7 @@ requirejs.config
   enforceDefine: true
   paths:
     chai:     "#{relRootDir}/node_modules/chai/chai"
-    HashMash: "#{relRootDir}/amd/hashmash"
+    hashmash: "#{relRootDir}/hashmash"
 
 describe "TestRunner", ->
   it "should run all tests", (done) ->

@@ -18,9 +18,10 @@ app.use express.methodOverride()
 app.use app.router
 app.use tinylr.middleware app: app
 app.use express.static(path.join(__dirname, "../public"))
-app.use "/js", express.static(path.join(__dirname, "../../amd"))
+app.use "/js", express.static(path.join(__dirname, "../../node_modules/when"))
 app.use "/js", express.static(path.join(__dirname, "../../node_modules/requirejs"))
 app.use "/js/poly", express.static(path.join(__dirname, "../../lib/poly"))
+app.use "/js/hashmash", express.static(path.join(__dirname, "../.."))
 
 ## development only
 if "development" is app.get("env")
@@ -31,7 +32,7 @@ app.get "/", (req, res) ->
 
 watch = [
   path.join __dirname, "../public/js"
-  path.join __dirname, "../../amd"
+  path.join __dirname, "../.."
   path.join __dirname, "../views"
 ]
 
