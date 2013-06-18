@@ -1,19 +1,24 @@
-(function() {
-  "use strict";
-  define(["./hashmash", "./taskmaster"], function(HashMash, taskmaster) {
-    var TimeoutTaskMaster, WebTaskMaster;
-    WebTaskMaster = taskmaster.WebTaskMaster, TimeoutTaskMaster = taskmaster.TimeoutTaskMaster;
-    if (typeof Worker !== "undefined" && Worker !== null) {
-      HashMash.TaskMaster = WebTaskMaster;
-      HashMash.BackupTaskMaster = TimeoutTaskMaster;
-    } else {
-      HashMash.TaskMaster = TimeoutTaskMaster;
-    }
-    return HashMash;
-  });
+/*global define, window */
 
-}).call(this);
+// main entry point for require.js
 
-/*
-//@ sourceMappingURL=main.js.map
-*/
+(function () {
+    "use strict";
+
+    define(["./lib/hashmash", "./lib/taskmaster"],
+        function (HashMash, taskmaster) {
+            var WebTaskMaster     = taskmaster.WebTaskMaster,
+                TimeoutTaskMaster = taskmaster.TimeoutTaskMaster;
+
+            if (!!window.Worker) {
+                // browser with web workers
+                HashMash.TaskMaster = WebTaskMaster;
+                HashMash.BackupTaskMaster = TimeoutTaskMaster;
+            } else {
+                // other browser
+                HashMash.TaskMaster = TimeoutTaskMaster;
+            }
+
+            return HashMash;
+        });
+}());

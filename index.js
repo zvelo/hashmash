@@ -1,24 +1,22 @@
-(function() {
-  "use strict";
-  var HashMash, path, requirejs;
+/*jslint nomen: true */
+/*global require, __dirname, module */
 
-  path = require("path");
+// main entry point for node.js
 
-  requirejs = require("requirejs");
+(function () {
+    "use strict";
 
-  requirejs.config({
-    baseUrl: path.join(__dirname, ".."),
-    nodeRequire: require
-  });
+    var requirejs = require("requirejs"),
+        path      = require("path"),
+        HashMash;
 
-  HashMash = requirejs("./hashmash");
+    requirejs.config({
+        baseUrl:     path.join(__dirname, "lib"),
+        nodeRequire: require
+    });
 
-  HashMash.TaskMaster = requirejs("./node/taskmaster");
+    HashMash = requirejs("./hashmash");
+    HashMash.TaskMaster = requirejs("./node/taskmaster");
 
-  module.exports = HashMash;
-
-}).call(this);
-
-/*
-//@ sourceMappingURL=main.js.map
-*/
+    module.exports = HashMash;
+}());

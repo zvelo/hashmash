@@ -4,9 +4,21 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON "package.json"
 
     clean:
-      lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
-      optimized: "*.min.js"
-      example: [ "example/public/js/*.js", "example/public/js/*.map" ]
+      lib: [
+        "lib/*.js"
+        "lib/*.map"
+        "lib/**/*.js"
+        "lib/**/*.map"
+        "!lib/poly/*.js"
+        "!lib/poly/**/*.js"
+      ]
+      optimized: ["*.min.js", "*.map" ]
+      example: [
+        "example/public/js/*.js"
+        "example/public/js/*.map"
+        "!example/public/js/main.js"
+        "!example/public/js/worker.js"
+      ]
       test: [ "test/lib/*" ]
 
     coffee:
@@ -45,10 +57,10 @@ module.exports = (grunt) ->
         generateSourceMaps: true
         preserveLicenseComments: false
         paths:
-          almond: "../node_modules/almond/almond"
+          almond: "node_modules/almond/almond"
         packages: [
           name:     "when"
-          location: "../node_modules/when"
+          location: "node_modules/when"
           main:     "when"
         ,
           name:     "poly"
@@ -66,15 +78,15 @@ module.exports = (grunt) ->
                 ## multiline comment
                 return /@preserve|@license|@cc_on/i.test text
 
-      hashmash:
+      "hashmash.min.js":
         options:
-          include: [ "lib/poly/function", "copyright", "main" ]
+          include: [ "lib/poly/function", "copyright", "hashmash" ]
           out: "hashmash.min.js"
           wrap:
             startFile: "src/hashmash.start.frag"
             endFile: "src/hashmash.end.frag"
 
-      hashmash_worker:
+      "worker.min.js":
         options:
           include: [ "copyright", "worker" ]
           insertRequire: [ "worker" ]

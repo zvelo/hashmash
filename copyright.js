@@ -48,14 +48,9 @@
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  *
-*/
+ */
 
-
-(function() {
-
-
-}).call(this);
-
-/*
-//@ sourceMappingURL=copyright.js.map
-*/
+(function () {
+    "use strict";
+    return true;
+}());
