@@ -5,9 +5,9 @@ module.exports = (grunt) ->
 
     clean:
       lib: [ "lib/*.js", "lib/**/*.js", "!lib/poly/*.js", "!lib/poly/**/*.js" ]
-      optimized: [ "hashmash.js", "worker.js" ]
+      optimized: "*.min.js"
       example: [ "example/public/js/*.js", "example/public/js/*.map" ]
-      test: [ "test/lib" ]
+      test: [ "test/lib/*" ]
 
     coffee:
       options:
@@ -31,7 +31,7 @@ module.exports = (grunt) ->
       test:
         expand: true
         cwd: "test/src"
-        src: "**/main.coffee"
+        src: "*.coffee"
         dest: "test/lib"
         ext: ".js"
 
@@ -69,7 +69,7 @@ module.exports = (grunt) ->
       hashmash:
         options:
           include: [ "poly/function", "copyright", "main" ]
-          out: "hashmash.js"
+          out: "hashmash.min.js"
           wrap:
             startFile: "src/hashmash.start.frag"
             endFile: "src/hashmash.end.frag"
@@ -78,7 +78,7 @@ module.exports = (grunt) ->
         options:
           include: [ "copyright", "worker" ]
           insertRequire: [ "worker" ]
-          out: "worker.js"
+          out: "worker.min.js"
 
     coffeelint:
       options:
@@ -114,7 +114,7 @@ module.exports = (grunt) ->
         reporter: "list"
         colors: false
       node: "test/lib/node/*.js"
-      amd: "test/lib/mocha_amd/main.js"
+      amd: "test/lib/mocha.js"
 
     karma:
       options:

@@ -18,7 +18,7 @@ files = [
   { pattern: "node_modules/when/when.js", included: false },
 
   // the module files
-  { pattern: "*.js", included: false },
+  { pattern: "*.min.js", included: false },
 
   // polyfills
   { pattern: "lib/poly/*.js", included: false },

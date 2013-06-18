@@ -8,7 +8,7 @@
     var NUM_BITS, RESOURCE, WORKER_FILE;
     NUM_BITS = 20;
     RESOURCE = "zvelo.com";
-    WORKER_FILE = "/base/worker.js";
+    WORKER_FILE = "/base/worker.min.js";
     return describe("web workers", function() {
       return it("should generate the hashmash using web workers", function(done) {
         var hc;
@@ -27,10 +27,9 @@
     });
   };
 
-  define(["hashmash"], function(hashmash) {
-    HashMash = hashmash;
-    return execute();
-  });
+  HashMash = require("../../..");
+
+  execute();
 
 }).call(this);
 

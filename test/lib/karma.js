@@ -13,7 +13,7 @@
     enforceDefine: true,
     paths: {
       chai: "" + relRootDir + "/node_modules/chai/chai",
-      hashmash: "" + relRootDir + "/hashmash"
+      hashmash: "" + relRootDir + "/hashmash.min"
     },
     packages: [
       {
