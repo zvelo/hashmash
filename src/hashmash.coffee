@@ -171,7 +171,7 @@ define [ "when", "./sha1" ], (whn, sha1) ->
       return promise
 
     validate: (str) ->
-      return unless str?
+      return unless str? and typeof str is "string"
       return unless @_bits?
 
       data = HashMash.parse str
