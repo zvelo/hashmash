@@ -50,11 +50,8 @@
 
   describe("TestRunner", function() {
     return it("should run all tests", function(done) {
-      return requirejs(["chai"], function(chai) {
-        chai.should();
-        return requirejs(tests, function() {
-          return done();
-        });
+      return requirejs(tests, function() {
+        return done();
       });
     });
   });

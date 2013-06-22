@@ -1,5 +1,7 @@
-sha1 = undefined
+expect = undefined
+sha1   = undefined
 
-define [ "hashmash" ], (HashMash) ->
-  sha1 = HashMash
+define [ "chai", "hashmash" ], (chai, HashMash) ->
+  expect = chai.expect
+  sha1   = HashMash
   execute()

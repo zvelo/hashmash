@@ -1,6 +1,8 @@
 (function() {
   "use strict";
-  var HashMash, execute;
+  var HashMash, execute, expect;
+
+  expect = void 0;
 
   HashMash = void 0;
 
@@ -15,19 +17,19 @@
         this.timeout(60000);
         hc = new HashMash(NUM_BITS, WORKER_FILE);
         return hc.generate(RESOURCE).then(function(result) {
-          var parts;
-          hc.validate(result).should.equal(true);
+          var parsed, parts;
+          parsed = HashMash.parse(result);
+          expect(hc.validate(result)).to.exist.and.deep.equal(parsed);
           parts = HashMash.parse(result);
-          parts.resource.should.equal(RESOURCE);
+          expect(parts.resource).to.equal(RESOURCE);
           return done();
-        }).otherwise(function() {
-          return done("HashMash generation failed");
-        });
+        }).otherwise(done);
       });
     });
   };
 
-  define(["hashmash"], function(hashmash) {
+  define(["chai", "hashmash"], function(chai, hashmash) {
+    expect = chai.expect;
     HashMash = hashmash;
     return execute();
   });

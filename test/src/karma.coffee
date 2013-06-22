@@ -20,7 +20,5 @@ requirejs.config
     location: "#{relRootDir}/lib/poly"
     main:     "poly"
   ]
-  deps: [ "chai", "poly/function" ]
-  callback: (chai) ->
-    chai.should()
-    requirejs tests, -> window.__karma__.start()
+  deps: [ "poly/function" ]
+  callback: -> requirejs tests, -> window.__karma__.start()
