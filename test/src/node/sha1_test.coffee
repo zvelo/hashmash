@@ -1,2 +1,3 @@
-sha1 = require "../../.."
+expect = require("chai").expect
+sha1   = require "../../.."
 execute()

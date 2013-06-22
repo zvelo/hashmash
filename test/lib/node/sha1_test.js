@@ -1,6 +1,8 @@
 (function() {
   "use strict";
-  var execute, sha1;
+  var execute, expect, sha1;
+
+  expect = void 0;
 
   sha1 = void 0;
 
@@ -8,12 +10,12 @@
     return describe("sha1", function() {
       describe("short", function() {
         return it("should match the known value", function() {
-          return sha1.hash("abc").should.equal("a9993e364706816aba3e25717850c26c9cd0d89d");
+          return expect(sha1.hash("abc")).to.equal("a9993e364706816aba3e25717850c26c9cd0d89d");
         });
       });
       describe("medium", function() {
         return it("should match the known value", function() {
-          return sha1.hash("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq").should.equal("84983e441c3bd26ebaae4aa1f95129e5e54670f1");
+          return expect(sha1.hash("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")).to.equal("84983e441c3bd26ebaae4aa1f95129e5e54670f1");
         });
       });
       return describe("long", function() {
@@ -24,12 +26,14 @@
           for (i = _i = 1; 1 <= ONE_MILLION ? _i <= ONE_MILLION : _i >= ONE_MILLION; i = 1 <= ONE_MILLION ? ++_i : --_i) {
             str += 'a';
           }
-          str.length.should.equal(ONE_MILLION);
-          return sha1.hash(str).should.equal("34aa973cd4c4daa4f61eeb2bdbad27316534016f");
+          expect(str.length).to.equal(ONE_MILLION);
+          return expect(sha1.hash(str)).to.equal("34aa973cd4c4daa4f61eeb2bdbad27316534016f");
         });
       });
     });
   };
+
+  expect = require("chai").expect;
 
   sha1 = require("../../..");
 

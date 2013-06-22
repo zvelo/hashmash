@@ -40,31 +40,31 @@ define [ "when", "./sha1" ], (whn, sha1) ->
       "#{yy}#{mm}#{dd}"
 
     @parse: (str) ->
-      return null if not str?
+      return null unless str?
 
       data = {}
 
       pos = start: 0, end: -1, length: -> @end - @start
 
-      return null if not _nextPos str, pos
+      return null unless _nextPos str, pos
       data.version = parseInt str.substr(pos.start, pos.length()), 10
       return null if isNaN data.version
 
-      return null if not _nextPos str, pos
+      return null unless _nextPos str, pos
       data.bits = parseInt str.substr(pos.start, pos.length()), 10
       return null if isNaN data.bits
 
-      return null if not _nextPos str, pos
+      return null unless _nextPos str, pos
       data.date = parseInt str.substr(pos.start, pos.length()), 10
       return null if isNaN data.date
 
-      return null if not _nextPos str, pos
+      return null unless _nextPos str, pos
       data.resource = str.substr pos.start, pos.length()
-      return null if not data.resource.length
+      return null unless data.resource.length
 
-      return null if not _nextPos str, pos
+      return null unless _nextPos str, pos
       data.rand = str.substr pos.start, pos.length()
-      return null if not data.rand.length
+      return null unless data.rand.length
 
       ## allow -1 for pos.end as it's the last field
       _nextPos str, pos
@@ -77,24 +77,24 @@ define [ "when", "./sha1" ], (whn, sha1) ->
     @unparse: (parts) ->
       ret = ""
 
-      return ret if not parts.version?
+      return ret unless parts.version?
       ret += "#{parts.version}:"
 
-      return ret if not parts.bits?
+      return ret unless parts.bits?
       ret += "#{parts.bits}:"
 
-      return ret if not parts.date?
+      return ret unless parts.date?
       date = _buildDate parts.date
-      return ret if not date?
+      return ret unless date?
       ret += "#{date}:"
 
-      return ret if not parts.resource?
+      return ret unless parts.resource?
       ret += "#{parts.resource}:"
 
-      return ret if not parts.rand?
+      return ret unless parts.rand?
       ret += parts.rand
 
-      return ret if not parts.counter?
+      return ret unless parts.counter?
       ret += ":#{parts.counter}"
 
       ret
@@ -127,8 +127,6 @@ define [ "when", "./sha1" ], (whn, sha1) ->
         numWorkers = TaskMaster.DEFAULT_NUM_WORKERS
 
       return unless numWorkers
-
-      console.log "using #{numWorkers} workers"
 
       @_workers = (
         for num in [ 1 .. numWorkers ]
@@ -173,20 +171,22 @@ define [ "when", "./sha1" ], (whn, sha1) ->
       return promise
 
     validate: (str) ->
-      return false if not str?
-      return false if not @_bits?
+      return unless str?
+      return unless @_bits?
 
       data = HashMash.parse str
 
-      return false if not data?
-      return false if data.bits < @_bits
-      return false if data.bits < HashMash.MIN_BITS
+      return unless data?
+      return if data.bits < @_bits
+      return if data.bits < HashMash.MIN_BITS
 
-      return false if data.version isnt HashMash.VERSION
+      return if data.version isnt HashMash.VERSION
 
       now = HashMash.date()
-      return false if data.date < now - 1 or data.date > now + 1
+      return if data.date < now - 1 or data.date > now + 1
 
-      sha1.leading0s(HashMash.hash(str)) >= data.bits
+      return unless sha1.leading0s(HashMash.hash(str)) >= data.bits
+
+      return data
 
   return HashMash

@@ -1,4 +1,4 @@
 define [ "chai", "hashmash" ], (chai, hashmash) ->
-  should = chai.should()
+  expect   = chai.expect
   HashMash = hashmash
   execute()

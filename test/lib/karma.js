@@ -26,9 +26,8 @@
         main: "poly"
       }
     ],
-    deps: ["chai", "poly/function"],
-    callback: function(chai) {
-      chai.should();
+    deps: ["poly/function"],
+    callback: function() {
       return requirejs(tests, function() {
         return window.__karma__.start();
       });

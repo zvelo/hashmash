@@ -1,5 +1,6 @@
 "use strict"
 
+expect   = undefined
 HashMash = undefined
 
 execute = ->
@@ -14,8 +15,9 @@ execute = ->
       hc = new HashMash NUM_BITS, WORKER_FILE
       hc.generate(RESOURCE)
         .then((result) ->
-          hc.validate(result).should.equal true
+          parsed = HashMash.parse result
+          expect(hc.validate result).to.exist.and.deep.equal parsed
           parts = HashMash.parse result
-          parts.resource.should.equal(RESOURCE)
+          expect(parts.resource).to.equal RESOURCE
           done())
-        .otherwise(-> done("HashMash generation failed"))
+        .otherwise(done)

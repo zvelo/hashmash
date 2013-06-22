@@ -37,6 +37,4 @@ requirejs.config
 
 describe "TestRunner", ->
   it "should run all tests", (done) ->
-    requirejs [ "chai" ], (chai) ->
-      chai.should()
-      requirejs tests, -> done()
+    requirejs tests, -> done()
