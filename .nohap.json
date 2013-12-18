@@ -1,0 +1,13 @@
+{
+    "github": {
+        "repo": "hashmash"
+    },
+    "pivotal_tracker": {
+        "project": {
+            "id": 923852
+        }
+    },
+    "hipchat": {
+        "room": "Web"
+    }
+}
