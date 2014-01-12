@@ -1,3 +1,4 @@
 *.swp
 *.map
+/lib-cov
 /node_modules

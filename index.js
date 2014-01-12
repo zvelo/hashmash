@@ -8,10 +8,11 @@
 
     var requirejs = require("requirejs"),
         path      = require("path"),
+        libpath   = process.env["HASHMASH_COV"] ? "lib-cov" : "lib",
         HashMash;
 
     requirejs.config({
-        baseUrl:     path.join(__dirname, "lib"),
+        baseUrl:     path.join(__dirname, libpath),
         nodeRequire: require
     });
 

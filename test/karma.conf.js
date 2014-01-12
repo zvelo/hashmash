@@ -5,11 +5,11 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '..',
+    basePath: "..",
 
 
     // frameworks to use
-    frameworks: ['mocha', 'requirejs'],
+    frameworks: [ "mocha", "requirejs" ],
 
 
     // list of files / patterns to load in the browser
@@ -39,9 +39,8 @@ module.exports = function(config) {
 
 
     // test results reporter to use
-    // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress'],
-
+    // possible values: "dots", "progress", "junit", "growl", "coverage"
+    reporters: [ "progress" ],
 
     // web server port
     port: 9876,
@@ -68,7 +67,7 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Chrome'],
+    browsers: [ "Chrome" ],
 
 
     // If browser does not capture in given timeout [ms], kill it
