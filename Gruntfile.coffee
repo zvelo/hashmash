@@ -11,6 +11,7 @@ module.exports = (grunt) ->
         "lib/**/*.map"
         "!lib/poly/*.js"
         "!lib/poly/**/*.js"
+        "lib-cov"
       ]
       optimized: ["*.min.js", "*.map" ]
       example: [

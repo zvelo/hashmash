@@ -17,7 +17,8 @@
     "url": "https://github.com/zvelo/hashmash.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/grunt test"
+    "test": "./node_modules/.bin/grunt test",
+    "coveralls": "rm -rf lib-cov && ./node_modules/.bin/jscoverage lib lib-cov && HASHMASH_COV=1 mocha 'test/lib/node/*.js' -R mocha-lcov-reporter | ./node_modules/.bin/coveralls"
   },
   "dependencies": {
     "when": "2.x.x",
@@ -30,8 +31,11 @@
     "tiny-lr": "0.x.x",
     "express": "3.x.x",
     "amdefine": "0.x.x",
+    "coveralls": "2.x.x",
     "phantomjs": "1.x.x",
+    "jscoverage": "0.x.x",
     "karma-mocha": "0.x.x",
+    "mocha-lcov-reporter": "0.x.x",
     "grunt": "0.x.x",
     "grunt-cli": "0.x.x",
     "grunt-karma": "0.x.x",
